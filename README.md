@@ -1,1 +1,1 @@
-This is the repository for the Java implementation of 'Distributed Local Service API' for the '[Eclipse Keyple](https://keyple.org/)' project.
+This is the repository for the Java implementation of the 'distributed local service end users API' for the '[Eclipse Keyple](https://keyple.org/)' project.
