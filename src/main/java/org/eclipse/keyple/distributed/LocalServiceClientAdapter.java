@@ -243,12 +243,18 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     while (!message.getAction().equals(Action.END_REMOTE_SERVICE.name())
         && !message.getAction().equals(Action.ERROR.name())) {
 
-      // Execute the command locally.
-      String jsonResult =
-          getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
+      try {
+        // Execute the command locally.
+        String jsonResult =
+            getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
 
-      // Build the response to send back to the server.
-      message = new MessageDto(message).setAction(Action.RESP.name()).setBody(jsonResult);
+        // Build the response to send back to the server.
+        message.setAction(Action.RESP.name()).setBody(jsonResult);
+
+      } catch (IllegalStateException e) {
+        // Build the error response to send back to the client.
+        message.setAction(MessageDto.Action.ERROR.name()).setBody(JsonUtil.toJson(e));
+      }
 
       // Send the response and get the next command to process.
       message = getNode().sendRequest(message);

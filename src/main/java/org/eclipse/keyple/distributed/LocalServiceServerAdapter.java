@@ -13,6 +13,7 @@ package org.eclipse.keyple.distributed;
 
 import java.util.Arrays;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
+import org.eclipse.keyple.core.util.json.JsonUtil;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,23 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   void onMessage(MessageDto msg) {
-    getLocalServiceApi().executeLocally(msg.getBody(), msg.getLocalReaderName());
+
+    MessageDto result;
+    try {
+      // Execute the command locally.
+      String jsonResult =
+          getLocalServiceApi().executeLocally(msg.getBody(), msg.getLocalReaderName());
+
+      // Build the response to send back to the client.
+      result = new MessageDto(msg).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
+
+    } catch (IllegalStateException e) {
+      // Build the error response to send back to the client.
+      result =
+          new MessageDto(msg).setAction(MessageDto.Action.ERROR.name()).setBody(JsonUtil.toJson(e));
+    }
+
+    // Send the response.
+    getNode().sendMessage(result);
   }
 }
