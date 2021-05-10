@@ -21,8 +21,8 @@ import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtension;
  * a remote application :
  *
  * <ul>
- *   <li>To <b>start</b> the service, use the class {//@link LocalServiceServerFactoryBuilder} to
- *       build an instance of the factory {//@link LocalServiceServerFactory} and register it to the
+ *   <li>To <b>start</b> the service, use the class {@link LocalServiceServerFactoryBuilder} to
+ *       build an instance of the factory {@link LocalServiceServerFactory} and register it to the
  *       Keyple service.
  *   <li>To <b>access</b> the service, use the available accessors in the Keyple service, but it is
  *       not necessary because this service is only used internally by Keyple.

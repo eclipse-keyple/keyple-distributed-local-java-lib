@@ -16,12 +16,12 @@ import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
 
 /**
  * (package-private)<br>
- * Adapter of {//@link LocalServiceServerFactory} and {@link PoolLocalServiceServerFactory}.
+ * Adapter of {@link LocalServiceServerFactory} and {@link PoolLocalServiceServerFactory}.
  *
  * @since 2.0
  */
 final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactoryAdapter
-    implements PoolLocalServiceServerFactory {
+    implements LocalServiceServerFactory, PoolLocalServiceServerFactory {
 
   private final AsyncEndpointServerSpi asyncEndpointServerSpi;
   private final String[] poolPluginNames;
