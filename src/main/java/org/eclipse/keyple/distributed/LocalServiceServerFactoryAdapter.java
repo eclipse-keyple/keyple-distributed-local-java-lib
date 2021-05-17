@@ -11,17 +11,18 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
+import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtensionFactory;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceSpi;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
 
 /**
  * (package-private)<br>
- * Adapter of {@link LocalServiceServerFactory} and {@link PoolLocalServiceServerFactory}.
+ * Adapter of {@link LocalServiceServerFactory}.
  *
  * @since 2.0
  */
 final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactoryAdapter
-    implements LocalServiceServerFactory, PoolLocalServiceServerFactory {
+    implements LocalServiceServerFactory, KeypleDistributedLocalServiceExtensionFactory {
 
   private final AsyncEndpointServerSpi asyncEndpointServerSpi;
   private final String[] poolPluginNames;

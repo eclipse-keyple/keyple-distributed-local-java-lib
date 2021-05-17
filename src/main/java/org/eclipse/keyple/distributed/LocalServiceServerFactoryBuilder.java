@@ -73,6 +73,18 @@ public final class LocalServiceServerFactoryBuilder {
   public interface BuilderStep {
 
     /**
+     * Configures the service with one or more pool plugin(s) in order to restrict the search area
+     * for pool plugin only.
+     *
+     * @param poolPluginNames One or more pool plugin names.
+     * @return Next configuration step.
+     * @throws IllegalArgumentException If no pool plugin name is set or if some names are null or
+     *     empty.
+     * @since 2.0
+     */
+    BuilderStep withPoolPlugins(String... poolPluginNames);
+
+    /**
      * Creates a new instance of {@link LocalServiceServerFactory} using the current configuration.
      *
      * @return A not null reference.
@@ -89,6 +101,7 @@ public final class LocalServiceServerFactoryBuilder {
 
     private final String localServiceName;
     private AsyncEndpointServerSpi asyncEndpoint;
+    private String[] poolPluginNames;
 
     private Builder(String localServiceName) {
       Assert.getInstance().notEmpty(localServiceName, "localServiceName");
@@ -123,8 +136,23 @@ public final class LocalServiceServerFactoryBuilder {
      * @since 2.0
      */
     @Override
+    public BuilderStep withPoolPlugins(String... poolPluginNames) {
+      Assert.getInstance().notNull(poolPluginNames, "poolPluginNames");
+      for (String poolPluginName : poolPluginNames) {
+        Assert.getInstance().notEmpty(poolPluginName, "poolPluginName");
+      }
+      this.poolPluginNames = poolPluginNames;
+      return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @since 2.0
+     */
+    @Override
     public LocalServiceServerFactory build() {
-      return new LocalServiceServerFactoryAdapter(localServiceName, asyncEndpoint);
+      return new LocalServiceServerFactoryAdapter(localServiceName, asyncEndpoint, poolPluginNames);
     }
   }
 }
