@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.keyple.core.common.KeypleReaderEvent;
 import org.eclipse.keyple.core.common.KeypleSmartCard;
 import org.eclipse.keyple.core.util.Assert;
-import org.eclipse.keyple.core.util.json.BodyError;
 import org.eclipse.keyple.core.util.json.JsonUtil;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointClientSpi;
 import org.eclipse.keyple.distributed.spi.ReaderEventFilterSpi;
@@ -268,35 +267,21 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
   /**
    * (private)<br>
-   * Checks if the provided message contains an error.
-   *
-   * @param message The message to check.
-   * @throws RuntimeException If the message contains an error.
-   */
-  private void checkError(MessageDto message) {
-    if (message.getAction().equals(Action.ERROR.name())) {
-      throw new RuntimeException( // NOSONAR
-          JsonUtil.getParser().fromJson(message.getBody(), BodyError.class).getException());
-    }
-  }
-
-  /**
-   * (private)<br>
    * Extracts the user output data from the provided message if configured.
    *
-   * @param msg The message.
+   * @param message The message.
    * @param classOfUserOutputData The class of the user output data.
    * @param <T> The type of the output data.
    * @return Null if there is no user data to extract.
    */
-  private <T> T extractUserOutputData(MessageDto msg, Class<T> classOfUserOutputData) {
+  private <T> T extractUserOutputData(MessageDto message, Class<T> classOfUserOutputData) {
     if (classOfUserOutputData == null) {
       return null;
     }
     Gson parser = JsonUtil.getParser();
     String userOutputJsonData =
         parser
-            .fromJson(msg.getBody(), JsonObject.class)
+            .fromJson(message.getBody(), JsonObject.class)
             .get(JsonProperty.USER_OUTPUT_DATA.name())
             .getAsString();
     return parser.fromJson(userOutputJsonData, classOfUserOutputData);

@@ -20,12 +20,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
- * Adapter of {@link LocalServiceServer} and {@link PoolLocalServiceServer}.
+ * Adapter of {@link LocalServiceServer}.
  *
  * @since 2.0
  */
 final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
-    implements LocalServiceServer, PoolLocalServiceServer {
+    implements LocalServiceServer {
 
   private static final Logger logger = LoggerFactory.getLogger(LocalServiceServerAdapter.class);
 
@@ -49,14 +49,10 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     this.poolPluginNames = poolPluginNames;
 
     // Logging
-    String serviceType = poolPluginNames != null ? "PoolLocalServiceServer" : "LocalServiceServer";
     String nodeType = asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer";
-    String withPoolPluginNames =
-        poolPluginNames != null ? ", withPoolPluginNames=" + Arrays.toString(poolPluginNames) : "";
-
+    String withPoolPluginNames = Arrays.toString(poolPluginNames);
     logger.info(
-        "Create a new '{}' with name='{}', nodeType='{}'{}",
-        serviceType,
+        "Create a new 'LocalServiceServer' with name='{}', nodeType='{}', withPoolPluginNames={}",
         localServiceName,
         nodeType,
         withPoolPluginNames);
@@ -119,24 +115,39 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    * @since 2.0
    */
   @Override
-  void onMessage(MessageDto msg) {
+  void onMessage(MessageDto message) {
 
-    MessageDto result;
-    try {
-      // Execute the command locally.
-      String jsonResult =
-          getLocalServiceApi().executeLocally(msg.getBody(), msg.getLocalReaderName());
+    switch (MessageDto.Action.valueOf(message.getAction())) {
 
-      // Build the response to send back to the client.
-      result = new MessageDto(msg).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
+      case START_PLUGINS_OBSERVATION:
+        getLocalServiceApi().startPluginsObservation();
+        break;
 
-    } catch (IllegalStateException e) {
-      // Build the error response to send back to the client.
-      result =
-          new MessageDto(msg).setAction(MessageDto.Action.ERROR.name()).setBody(JsonUtil.toJson(e));
+      case STOP_PLUGINS_OBSERVATION:
+        getLocalServiceApi().stopPluginsObservation();
+        break;
+
+      default:
+        MessageDto result;
+        try {
+          // Execute the command locally.
+          String jsonResult =
+              getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
+
+          // Build the response to send back to the client.
+          result =
+              new MessageDto(message).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
+
+        } catch (IllegalStateException e) {
+          // Build the error response to send back to the client.
+          result =
+              new MessageDto(message)
+                  .setAction(MessageDto.Action.ERROR.name())
+                  .setBody(JsonUtil.toJson(e));
+        }
+
+        // Send the response.
+        getNode().sendMessage(result);
     }
-
-    // Send the response.
-    getNode().sendMessage(result);
   }
 }
