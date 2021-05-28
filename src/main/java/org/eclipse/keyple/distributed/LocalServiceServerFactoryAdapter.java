@@ -11,9 +11,12 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
+import java.util.Arrays;
 import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtensionFactory;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceSpi;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
@@ -23,6 +26,9 @@ import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
  */
 final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactoryAdapter
     implements LocalServiceServerFactory, KeypleDistributedLocalServiceExtensionFactory {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(LocalServiceServerFactoryAdapter.class);
 
   private final AsyncEndpointServerSpi asyncEndpointServerSpi;
   private final String[] poolPluginNames;
@@ -52,7 +58,25 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
    */
   @Override
   public LocalServiceSpi getLocalService() {
-    return new LocalServiceServerAdapter(
-        getLocalServiceName(), asyncEndpointServerSpi, poolPluginNames);
+
+    // Create the local service.
+    LocalServiceServerAdapter localService = new LocalServiceServerAdapter(getLocalServiceName());
+
+    // Bind the node.
+    String nodeType = asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer";
+    String withPoolPluginNames = Arrays.toString(poolPluginNames);
+    logger.info(
+        "Create a new 'LocalServiceServer' with name='{}', nodeType='{}', withPoolPluginNames={}",
+        getLocalServiceName(),
+        nodeType,
+        withPoolPluginNames);
+
+    if (asyncEndpointServerSpi == null) {
+      localService.bindSyncNodeServer();
+    } else {
+      localService.bindAsyncNodeServer(asyncEndpointServerSpi);
+    }
+
+    return localService;
   }
 }

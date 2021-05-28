@@ -11,10 +11,6 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
-import static org.eclipse.keyple.distributed.MessageDto.*;
-
-import org.eclipse.keyple.core.common.KeyplePluginEvent;
-import org.eclipse.keyple.core.common.KeypleReaderEvent;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceSpi;
 
@@ -44,7 +40,7 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
 
   /**
    * (package-private)<br>
-   * Gets the connected Keyple core local service api.
+   * Gets the connected Keyple core local service API.
    *
    * @return Null if the current local service is not yet registered to the Keyple main service.
    * @since 2.0
@@ -71,50 +67,5 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
   @Override
   public final String getName() {
     return localServiceName;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0
-   */
-  @Override
-  public final void onPluginEvent(
-      String readerName, String jsonData, KeyplePluginEvent pluginEvent) {
-    sendMessage(Action.PLUGIN_EVENT, readerName, jsonData);
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0
-   */
-  @Override
-  public void onReaderEvent(String readerName, String jsonData, KeypleReaderEvent readerEvent) {
-    sendMessage(Action.READER_EVENT, readerName, jsonData);
-  }
-
-  /**
-   * (private)<br>
-   * Sends a message associated to a new session ID using the provided reader name for local and
-   * remote reader.
-   *
-   * @param action The action.
-   * @param readerName The reader name (local and remote).
-   * @param jsonData The body content.
-   */
-  private void sendMessage(Action action, String readerName, String jsonData) {
-
-    // Build a plugin event message with a new session ID.
-    MessageDto message =
-        new MessageDto()
-            .setAction(action.name())
-            .setLocalReaderName(readerName)
-            .setRemoteReaderName(readerName)
-            .setSessionId(generateSessionId())
-            .setBody(jsonData);
-
-    // Send the message.
-    getNode().sendMessage(message);
   }
 }
