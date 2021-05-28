@@ -11,12 +11,8 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
-import java.util.Arrays;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.util.json.JsonUtil;
-import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
@@ -27,8 +23,6 @@ import org.slf4j.LoggerFactory;
 final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     implements LocalServiceServer {
 
-  private static final Logger logger = LoggerFactory.getLogger(LocalServiceServerAdapter.class);
-
   private final String[] poolPluginNames;
 
   /**
@@ -36,32 +30,12 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
-   * @param asyncEndpointServerSpi The async endpoint server to bind.
    * @param poolPluginNames One or more pool plugin names to bind (for pool only).
    * @since 2.0
    */
-  LocalServiceServerAdapter(
-      String localServiceName,
-      AsyncEndpointServerSpi asyncEndpointServerSpi,
-      String... poolPluginNames) {
-
+  LocalServiceServerAdapter(String localServiceName, String... poolPluginNames) {
     super(localServiceName);
     this.poolPluginNames = poolPluginNames;
-
-    // Logging
-    String nodeType = asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer";
-    String withPoolPluginNames = Arrays.toString(poolPluginNames);
-    logger.info(
-        "Create a new 'LocalServiceServer' with name='{}', nodeType='{}', withPoolPluginNames={}",
-        localServiceName,
-        nodeType,
-        withPoolPluginNames);
-
-    if (asyncEndpointServerSpi == null) {
-      bindSyncNodeServer();
-    } else {
-      bindAsyncNodeServer(asyncEndpointServerSpi);
-    }
   }
 
   /**
@@ -115,39 +89,70 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    * @since 2.0
    */
   @Override
+  public void onPluginEvent(String readerName, String jsonData) {
+    sendMessage(MessageDto.Action.PLUGIN_EVENT, readerName, jsonData);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0
+   */
+  @Override
+  public void onReaderEvent(String readerName, String jsonData) {
+    sendMessage(MessageDto.Action.READER_EVENT, readerName, jsonData);
+  }
+
+  /**
+   * (private)<br>
+   * Sends a message associated to a new session ID using the provided reader name for local and
+   * remote reader.
+   *
+   * @param action The action.
+   * @param readerName The reader name (local and remote).
+   * @param jsonData The body content.
+   */
+  private void sendMessage(MessageDto.Action action, String readerName, String jsonData) {
+
+    // Build a plugin event message with a new session ID.
+    MessageDto message =
+        new MessageDto()
+            .setAction(action.name())
+            .setLocalReaderName(readerName)
+            .setRemoteReaderName(readerName)
+            .setSessionId(generateSessionId())
+            .setBody(jsonData);
+
+    // Send the message.
+    getNode().sendMessage(message);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0
+   */
+  @Override
   void onMessage(MessageDto message) {
 
-    switch (MessageDto.Action.valueOf(message.getAction())) {
+    MessageDto result;
+    try {
+      // Execute the command locally.
+      String jsonResult =
+          getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
 
-      case START_PLUGINS_OBSERVATION:
-        getLocalServiceApi().startPluginsObservation();
-        break;
+      // Build the response to send back to the client.
+      result = new MessageDto(message).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
 
-      case STOP_PLUGINS_OBSERVATION:
-        getLocalServiceApi().stopPluginsObservation();
-        break;
-
-      default:
-        MessageDto result;
-        try {
-          // Execute the command locally.
-          String jsonResult =
-              getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
-
-          // Build the response to send back to the client.
-          result =
-              new MessageDto(message).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
-
-        } catch (IllegalStateException e) {
-          // Build the error response to send back to the client.
-          result =
-              new MessageDto(message)
-                  .setAction(MessageDto.Action.ERROR.name())
-                  .setBody(JsonUtil.toJson(e));
-        }
-
-        // Send the response.
-        getNode().sendMessage(result);
+    } catch (IllegalStateException e) {
+      // Build the error response to send back to the client.
+      result =
+          new MessageDto(message)
+              .setAction(MessageDto.Action.ERROR.name())
+              .setBody(JsonUtil.toJson(e));
     }
+
+    // Send the response.
+    getNode().sendMessage(result);
   }
 }

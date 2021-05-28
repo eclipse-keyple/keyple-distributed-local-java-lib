@@ -15,15 +15,8 @@ import static org.eclipse.keyple.distributed.MessageDto.*;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.eclipse.keyple.core.common.KeypleReaderEvent;
-import org.eclipse.keyple.core.common.KeypleSmartCard;
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.core.util.json.JsonUtil;
-import org.eclipse.keyple.distributed.spi.AsyncEndpointClientSpi;
-import org.eclipse.keyple.distributed.spi.ReaderEventFilterSpi;
-import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,52 +31,16 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
   private static final Logger logger = LoggerFactory.getLogger(LocalServiceClientAdapter.class);
 
-  private final boolean withReaderObservation;
-  private final ReaderEventFilterSpi readerEventFilterSpi;
-  private final Map<String, String> localReaderNameToRemoteReaderNameMap;
-
   /**
    * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
-   * @param syncEndpointClientSpi The sync endpoint client to bind.
-   * @param asyncEndpointClientSpi The async endpoint client to bind.
-   * @param asyncNodeClientTimeoutSeconds The async node client timeout (in seconds).
-   * @param withReaderObservation With reader observation ?
-   * @param readerEventFilterSpi The optional reader event filter to use if reader observation is
-   *     requested.
    * @since 2.0
    */
-  LocalServiceClientAdapter(
-      String localServiceName,
-      SyncEndpointClientSpi syncEndpointClientSpi,
-      AsyncEndpointClientSpi asyncEndpointClientSpi,
-      int asyncNodeClientTimeoutSeconds,
-      boolean withReaderObservation,
-      ReaderEventFilterSpi readerEventFilterSpi) {
+  LocalServiceClientAdapter(String localServiceName) {
 
     super(localServiceName);
-    this.withReaderObservation = withReaderObservation;
-    this.readerEventFilterSpi = readerEventFilterSpi;
-    this.localReaderNameToRemoteReaderNameMap = new ConcurrentHashMap<String, String>();
-
-    if (syncEndpointClientSpi != null) {
-      logger.info(
-          "Create a new 'LocalServiceClient' with name='{}', nodeType='SyncNodeClient', withReaderObservation={}, withReaderEventFilter={}.",
-          localServiceName,
-          withReaderObservation,
-          readerEventFilterSpi != null);
-      bindSyncNodeClient(syncEndpointClientSpi, null, null);
-    } else {
-      logger.info(
-          "Create a new 'LocalServiceClient' with name='{}', nodeType='AsyncNodeClient', timeoutSeconds={}, withReaderObservation={}, withReaderEventFilter={}.",
-          localServiceName,
-          asyncNodeClientTimeoutSeconds,
-          withReaderObservation,
-          readerEventFilterSpi != null);
-      bindAsyncNodeClient(asyncEndpointClientSpi, asyncNodeClientTimeoutSeconds);
-    }
   }
 
   /**
@@ -110,23 +67,17 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public <T> T executeRemoteService(
-      RemoteServiceParameters parameters, Class<T> classOfUserOutputData) {
+      String serviceId,
+      String localReaderName,
+      Object initialCardContent,
+      Object inputData,
+      Class<T> outputDataClass) {
 
     // Check params.
     Assert.getInstance()
-        .notNull(parameters, "parameters")
-        .notNull(classOfUserOutputData, "classOfUserOutputData");
-
-    // Check the local reader registration and observation compliance.
-    boolean isReaderObservable =
-        getLocalServiceApi().isReaderObservable(parameters.getLocalReaderName());
-
-    if (withReaderObservation && !isReaderObservable) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Reader observation can not be activated because local reader '%s' is not observable.",
-              parameters.getLocalReaderName()));
-    }
+        .notEmpty(serviceId, "serviceId")
+        .notEmpty(localReaderName, "localReaderName")
+        .notNull(outputDataClass, "outputDataClass");
 
     // Generate a new session ID.
     String sessionId = generateSessionId();
@@ -134,15 +85,16 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     if (logger.isDebugEnabled()) {
       logger.debug(
           "Start execution of remote service '{}' for local reader '{}' with session ID '{}'.",
-          parameters.getServiceId(),
-          parameters.getLocalReaderName(),
+          serviceId,
+          localReaderName,
           sessionId);
     }
 
     // Build the message DTO.
-    MessageDto message = buildServiceMessage(parameters, sessionId, isReaderObservable);
+    MessageDto message =
+        buildMessage(serviceId, localReaderName, initialCardContent, inputData, sessionId);
 
-    T userOutputData;
+    T outputData;
     try {
       // Open a new session on the node.
       getNode().openSession(sessionId);
@@ -150,22 +102,11 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
       // Send the first message.
       message = getNode().sendRequest(message);
 
-      // Start reader observation if requested.
-      if (withReaderObservation) {
-
-        // Register the remote reader name associated to the local reader name.
-        localReaderNameToRemoteReaderNameMap.put(
-            message.getLocalReaderName(), message.getRemoteReaderName());
-
-        // Start the observation.
-        getLocalServiceApi().startReaderObservation(message.getLocalReaderName());
-      }
-
       // Process the entire transaction.
       message = processTransaction(message);
 
-      // Extract user output data from last received message.
-      userOutputData = extractUserOutputData(message, classOfUserOutputData);
+      // Extract output data from last received message.
+      outputData = extractOutputData(message, outputDataClass);
 
     } finally {
       getNode().closeSessionSilently(sessionId);
@@ -174,39 +115,38 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     if (logger.isDebugEnabled()) {
       logger.debug(
           "Finish execution of remote service '{}' for local reader '{}' with session ID '{}'.",
-          parameters.getServiceId(),
-          parameters.getLocalReaderName(),
+          serviceId,
+          localReaderName,
           sessionId);
     }
 
-    return userOutputData;
+    return outputData;
   }
 
   /**
    * (private)<br>
    * Builds a message associated to the {@link Action#EXECUTE_REMOTE_SERVICE} action.
    *
-   * @param parameters The main parameters.
+   * @param serviceId The ticketing service ID.
+   * @param localReaderName The name of the local reader.
+   * @param initialCardContent The initial card content if needed.
+   * @param inputData The additional information if needed.
    * @param sessionId The session ID to use.
-   * @param isReaderObservable Is local reader observable ?
    * @return A not null reference.
    */
-  private MessageDto buildServiceMessage(
-      RemoteServiceParameters parameters, String sessionId, boolean isReaderObservable) {
+  private MessageDto buildMessage(
+      String serviceId,
+      String localReaderName,
+      Object initialCardContent,
+      Object inputData,
+      String sessionId) {
 
     JsonObject body = new JsonObject();
 
     // Service ID
-    body.addProperty(JsonProperty.SERVICE_ID.name(), parameters.getServiceId());
-
-    // User input data
-    Object userInputData = parameters.getUserInputData();
-    if (userInputData != null) {
-      body.add(JsonProperty.USER_INPUT_DATA.name(), JsonUtil.getParser().toJsonTree(userInputData));
-    }
+    body.addProperty(JsonProperty.SERVICE_ID.name(), serviceId);
 
     // Initial card content
-    KeypleSmartCard initialCardContent = parameters.getInitialCardContent();
     if (initialCardContent != null) {
       body.add(
           JsonProperty.INITIAL_CARD_CONTENT.name(),
@@ -216,14 +156,15 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
           initialCardContent.getClass().getName());
     }
 
-    // Is reader observable ?
-    body.addProperty(
-        JsonProperty.IS_READER_OBSERVABLE.name(), withReaderObservation && isReaderObservable);
+    // Input data
+    if (inputData != null) {
+      body.add(JsonProperty.INPUT_DATA.name(), JsonUtil.getParser().toJsonTree(inputData));
+    }
 
     return new MessageDto()
         .setSessionId(sessionId)
         .setAction(Action.EXECUTE_REMOTE_SERVICE.name())
-        .setLocalReaderName(parameters.getLocalReaderName())
+        .setLocalReaderName(localReaderName)
         .setBody(body.toString());
   }
 
@@ -267,24 +208,24 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
   /**
    * (private)<br>
-   * Extracts the user output data from the provided message if configured.
+   * Extracts the output data from the provided message if configured.
    *
    * @param message The message.
-   * @param classOfUserOutputData The class of the user output data.
+   * @param outputDataClass The class of the output data.
    * @param <T> The type of the output data.
    * @return Null if there is no user data to extract.
    */
-  private <T> T extractUserOutputData(MessageDto message, Class<T> classOfUserOutputData) {
-    if (classOfUserOutputData == null) {
+  private <T> T extractOutputData(MessageDto message, Class<T> outputDataClass) {
+    if (outputDataClass == null) {
       return null;
     }
     Gson parser = JsonUtil.getParser();
     String userOutputJsonData =
         parser
             .fromJson(message.getBody(), JsonObject.class)
-            .get(JsonProperty.USER_OUTPUT_DATA.name())
+            .get(JsonProperty.OUTPUT_DATA.name())
             .getAsString();
-    return parser.fromJson(userOutputJsonData, classOfUserOutputData);
+    return parser.fromJson(userOutputJsonData, outputDataClass);
   }
 
   /**
@@ -293,109 +234,18 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
    * @since 2.0
    */
   @Override
-  public void onReaderEvent(String readerName, String jsonData, KeypleReaderEvent readerEvent) {
-
-    // Apply the user's filter if is set and get the optional user input data to send to the server.
-    Object userInputData = null;
-    if (readerEventFilterSpi != null) {
-      try {
-        userInputData = readerEventFilterSpi.beforeEventBroadcast(readerEvent);
-      } catch (CancelEventBroadcastException e) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(
-              "User's reader event filter cancels the broadcast of the reader event : {}",
-              jsonData);
-        }
-        return;
-      }
-    }
-
-    // Generate a new session ID.
-    String sessionId = generateSessionId();
-
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "Start execution of reader event '{}' for local reader '{}' with session ID '{}'.",
-          jsonData,
-          readerName,
-          sessionId);
-    }
-
-    try {
-      // Build the message DTO.
-      MessageDto message = buildReaderEventMessage(readerName, jsonData, userInputData, sessionId);
-
-      // Open a new session on the node.
-      getNode().openSession(sessionId);
-
-      // Send the first message.
-      message = getNode().sendRequest(message);
-
-      // Process the entire transaction.
-      message = processTransaction(message);
-
-      // If user's filter is set, then extract optional user output data from last received message.
-      if (readerEventFilterSpi != null) {
-
-        Object userOutputData =
-            extractUserOutputData(message, readerEventFilterSpi.getUserOutputDataClass());
-
-        // Invoke filter callback.
-        readerEventFilterSpi.afterEventBroadcast(userOutputData);
-      }
-
-    } catch (RuntimeException e) {
-      // If user's filter is set, then notify the error and check if observation must be stopped.
-      if (readerEventFilterSpi != null) {
-        boolean stopObservation = readerEventFilterSpi.onEventBroadcastError(e);
-        if (stopObservation) {
-          getLocalServiceApi().stopReaderObservation(readerName);
-        }
-      }
-      throw e;
-
-    } finally {
-      getNode().closeSessionSilently(sessionId);
-    }
-
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "Finish execution of reader event '{}' for local reader '{}' with session ID '{}'.",
-          jsonData,
-          readerName,
-          sessionId);
-    }
+  public void onPluginEvent(String readerName, String jsonData) {
+    throw new UnsupportedOperationException("onPluginEvent");
   }
 
   /**
-   * (private)<br>
-   * Builds a message associated to the {@link Action#READER_EVENT} action.
+   * {@inheritDoc}
    *
-   * @param localReaderName The name of the local reader.
-   * @param jsonData The JSON representation of the reader event.
-   * @param userInputData The optional user input data.
-   * @param sessionId The session ID
-   * @return A not null reference.
+   * @since 2.0
    */
-  private MessageDto buildReaderEventMessage(
-      String localReaderName, String jsonData, Object userInputData, String sessionId) {
-
-    JsonObject body = new JsonObject();
-
-    // Reader event
-    body.addProperty(JsonProperty.READER_EVENT.name(), jsonData);
-
-    // User input data
-    if (userInputData != null) {
-      body.add(JsonProperty.USER_INPUT_DATA.name(), JsonUtil.getParser().toJsonTree(userInputData));
-    }
-
-    return new MessageDto()
-        .setSessionId(sessionId)
-        .setAction(Action.READER_EVENT.name())
-        .setLocalReaderName(localReaderName)
-        .setRemoteReaderName(localReaderNameToRemoteReaderNameMap.get(localReaderName))
-        .setBody(body.toString());
+  @Override
+  public void onReaderEvent(String readerName, String jsonData) {
+    throw new UnsupportedOperationException("onReaderEvent");
   }
 
   /**

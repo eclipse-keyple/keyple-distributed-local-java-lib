@@ -44,20 +44,28 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
   AsyncNodeClient getAsyncNode();
 
   /**
-   * Allows you to connect a local card reader to a remote server and execute a specific ticketing
-   * service from the server.
+   * Executes a specific ticketing service remotely from the server on a local reader.
    *
-   * <p>The service is identify by the <b>serviceId</b> parameter.
-   *
-   * @param parameters The service parameters (serviceId, ...) (see {@link RemoteServiceParameters}
-   *     documentation for all possible parameters).
-   * @param classOfUserOutputData The class of the expected user output data.
-   * @param <T> The generic type of the expected user output data.
+   * @param serviceId The ticketing service ID. It will permit to indicate to the server which
+   *     ticketing service to execute (Materialization, Validation, Control, etc...). This field is
+   *     free.
+   * @param localReaderName The name of the local reader to manage remotely from the server.
+   * @param initialCardContent (optional) : A <b><code>
+   *     org.calypsonet.terminal.reader.selection.SmartCard</code></b> containing the initial smart
+   *     card content to transmit to the remote ticketing service.
+   * @param inputData (optional) : A DTO containing additional information if needed.
+   * @param outputDataClass The class of the expected output data. At the end of the execution of
+   *     the remote service, the server can transmit output data if needed.
+   * @param <T> The generic type of the expected output data.
    * @return a new instance of <b>T</b>.
-   * @throws IllegalArgumentException If the input parameters or class is null, or if the reader
-   *     observation is required but the local reader is not observable.
+   * @throws IllegalArgumentException If the service ID or the local reader name are null or empty.
    * @throws IllegalStateException If the local reader is not registered.
    * @since 2.0
    */
-  <T> T executeRemoteService(RemoteServiceParameters parameters, Class<T> classOfUserOutputData);
+  <T> T executeRemoteService(
+      String serviceId,
+      String localReaderName,
+      Object initialCardContent,
+      Object inputData,
+      Class<T> outputDataClass);
 }

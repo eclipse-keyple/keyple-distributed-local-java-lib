@@ -13,7 +13,6 @@ package org.eclipse.keyple.distributed;
 
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointClientSpi;
-import org.eclipse.keyple.distributed.spi.ReaderEventFilterSpi;
 import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
 
 /**
@@ -56,7 +55,7 @@ public final class LocalServiceClientFactoryBuilder {
      * @throws IllegalArgumentException If the provided endpoint is null.
      * @since 2.0
      */
-    ReaderStep withSyncNode(SyncEndpointClientSpi endpoint);
+    BuilderStep withSyncNode(SyncEndpointClientSpi endpoint);
 
     /**
      * Configures the service with a {@link AsyncNodeClient} node.
@@ -68,32 +67,7 @@ public final class LocalServiceClientFactoryBuilder {
      * @throws IllegalArgumentException If the endpoint is null or the timeout {@code <} 1.
      * @since 2.0
      */
-    ReaderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds);
-  }
-
-  /**
-   * Step to configure the reader observation.
-   *
-   * @since 2.0
-   */
-  public interface ReaderStep {
-
-    /**
-     * Activates the local observation of the local reader events.
-     *
-     * @param filter The {@link ReaderEventFilterSpi} event filter to use (optional).
-     * @return Next configuration step.
-     * @since 2.0
-     */
-    BuilderStep withReaderObservation(ReaderEventFilterSpi filter);
-
-    /**
-     * Do not activates the observation of the local reader events.
-     *
-     * @return Next configuration step.
-     * @since 2.0
-     */
-    BuilderStep withoutReaderObservation();
+    BuilderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds);
   }
 
   /**
@@ -116,14 +90,12 @@ public final class LocalServiceClientFactoryBuilder {
    * (private)<br>
    * The internal step builder.
    */
-  private static final class Builder implements NodeStep, ReaderStep, BuilderStep {
+  private static final class Builder implements NodeStep, BuilderStep {
 
     private final String localServiceName;
     private SyncEndpointClientSpi syncEndpoint;
     private AsyncEndpointClientSpi asyncEndpoint;
     private int timeoutSeconds;
-    private boolean withReaderObservation;
-    private ReaderEventFilterSpi readerEventFilter;
 
     private Builder(String localServiceName) {
       Assert.getInstance().notEmpty(localServiceName, "localServiceName");
@@ -136,7 +108,7 @@ public final class LocalServiceClientFactoryBuilder {
      * @since 2.0
      */
     @Override
-    public ReaderStep withSyncNode(SyncEndpointClientSpi endpoint) {
+    public BuilderStep withSyncNode(SyncEndpointClientSpi endpoint) {
       Assert.getInstance().notNull(endpoint, "endpoint");
       this.syncEndpoint = endpoint;
       return this;
@@ -148,7 +120,7 @@ public final class LocalServiceClientFactoryBuilder {
      * @since 2.0
      */
     @Override
-    public ReaderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds) {
+    public BuilderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds) {
       Assert.getInstance()
           .notNull(endpoint, "endpoint")
           .greaterOrEqual(timeoutSeconds, 1, "timeoutSeconds");
@@ -163,37 +135,9 @@ public final class LocalServiceClientFactoryBuilder {
      * @since 2.0
      */
     @Override
-    public BuilderStep withReaderObservation(ReaderEventFilterSpi filter) {
-      this.withReaderObservation = true;
-      this.readerEventFilter = filter;
-      return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @since 2.0
-     */
-    @Override
-    public BuilderStep withoutReaderObservation() {
-      this.withReaderObservation = false;
-      return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @since 2.0
-     */
-    @Override
     public LocalServiceClientFactory build() {
       return new LocalServiceClientFactoryAdapter(
-          localServiceName,
-          syncEndpoint,
-          asyncEndpoint,
-          timeoutSeconds,
-          withReaderObservation,
-          readerEventFilter);
+          localServiceName, syncEndpoint, asyncEndpoint, timeoutSeconds);
     }
   }
 }

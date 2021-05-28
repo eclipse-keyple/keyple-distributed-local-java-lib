@@ -13,8 +13,9 @@ package org.eclipse.keyple.distributed;
 
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceSpi;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointClientSpi;
-import org.eclipse.keyple.distributed.spi.ReaderEventFilterSpi;
 import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
@@ -25,11 +26,12 @@ import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
 final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactoryAdapter
     implements LocalServiceClientFactory {
 
+  private static final Logger logger =
+      LoggerFactory.getLogger(LocalServiceClientFactoryAdapter.class);
+
   private final SyncEndpointClientSpi syncEndpointClientSpi;
   private final AsyncEndpointClientSpi asyncEndpointClientSpi;
   private final int asyncNodeClientTimeoutSeconds;
-  private final boolean withReaderObservation;
-  private final ReaderEventFilterSpi readerEventFilterSpi;
 
   /**
    * (package-private)<br>
@@ -39,24 +41,17 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
    * @param syncEndpointClientSpi The sync endpoint client to bind.
    * @param asyncEndpointClientSpi The async endpoint client to bind.
    * @param asyncNodeClientTimeoutSeconds The async node client timeout (in seconds).
-   * @param withReaderObservation With reader observation ?
-   * @param readerEventFilterSpi The optional reader event filter to use if reader observation is
-   *     requested.
    * @since 2.0
    */
   LocalServiceClientFactoryAdapter(
       String localServiceName,
       SyncEndpointClientSpi syncEndpointClientSpi,
       AsyncEndpointClientSpi asyncEndpointClientSpi,
-      int asyncNodeClientTimeoutSeconds,
-      boolean withReaderObservation,
-      ReaderEventFilterSpi readerEventFilterSpi) {
+      int asyncNodeClientTimeoutSeconds) {
     super(localServiceName);
     this.syncEndpointClientSpi = syncEndpointClientSpi;
     this.asyncEndpointClientSpi = asyncEndpointClientSpi;
     this.asyncNodeClientTimeoutSeconds = asyncNodeClientTimeoutSeconds;
-    this.withReaderObservation = withReaderObservation;
-    this.readerEventFilterSpi = readerEventFilterSpi;
   }
 
   /**
@@ -66,12 +61,27 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
    */
   @Override
   public LocalServiceSpi getLocalService() {
-    return new LocalServiceClientAdapter(
-        getLocalServiceName(),
-        syncEndpointClientSpi,
-        asyncEndpointClientSpi,
-        asyncNodeClientTimeoutSeconds,
-        withReaderObservation,
-        readerEventFilterSpi);
+
+    // Create the local service.
+    LocalServiceClientAdapter localService = new LocalServiceClientAdapter(getLocalServiceName());
+
+    // Bind the node.
+    if (syncEndpointClientSpi != null) {
+      logger.info(
+          "Create a new 'LocalServiceClient' with name='{}', nodeType='SyncNodeClient'",
+          getLocalServiceName());
+
+      localService.bindSyncNodeClient(syncEndpointClientSpi, null, null);
+
+    } else {
+      logger.info(
+          "Create a new 'LocalServiceClient' with name='{}', nodeType='AsyncNodeClient', timeoutSeconds={}",
+          getLocalServiceName(),
+          asyncNodeClientTimeoutSeconds);
+
+      localService.bindAsyncNodeClient(asyncEndpointClientSpi, asyncNodeClientTimeoutSeconds);
+    }
+
+    return localService;
   }
 }
