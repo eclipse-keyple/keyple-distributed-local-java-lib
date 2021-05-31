@@ -44,7 +44,7 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
   AsyncNodeClient getAsyncNode();
 
   /**
-   * Executes a specific ticketing service remotely from the server on a local reader.
+   * Executes on a local reader a specific ticketing service remotely from the server.
    *
    * @param serviceId The ticketing service ID. It will permit to indicate to the server which
    *     ticketing service to execute (Materialization, Validation, Control, etc...). This field is
@@ -53,11 +53,17 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
    * @param initialCardContent (optional) : A <b><code>
    *     org.calypsonet.terminal.reader.selection.SmartCard</code></b> containing the initial smart
    *     card content to transmit to the remote ticketing service.
-   * @param inputData (optional) : A DTO containing additional information if needed.
-   * @param outputDataClass The class of the expected output data. At the end of the execution of
-   *     the remote service, the server can transmit output data if needed.
+   * @param inputData (optional) : A DTO containing additional information if needed. This field is
+   *     free. This method uses Class.getClass() to get the type for the specified object, but the
+   *     getClass() loses the generic type information because of the Type Erasure feature of Java.
+   *     Note that this method works fine if the any of the object fields are of generic type, just
+   *     the object itself should not be of a generic type.
+   * @param outputDataClass (optional) : The class of the expected output data. At the end of the
+   *     execution of the remote service, the server can transmit output data if needed. A null
+   *     value indicates that the remote service will return nothing.
    * @param <T> The generic type of the expected output data.
-   * @return a new instance of <b>T</b>.
+   * @return A new instance of <b>T</b> or null if the provided output data class is null or if the
+   *     returned server output data is null.
    * @throws IllegalArgumentException If the service ID or the local reader name are null or empty.
    * @throws IllegalStateException If the local reader is not registered.
    * @since 2.0

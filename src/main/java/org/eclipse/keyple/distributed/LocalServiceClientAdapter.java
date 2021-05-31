@@ -76,8 +76,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     // Check params.
     Assert.getInstance()
         .notEmpty(serviceId, "serviceId")
-        .notEmpty(localReaderName, "localReaderName")
-        .notNull(outputDataClass, "outputDataClass");
+        .notEmpty(localReaderName, "localReaderName");
 
     // Generate a new session ID.
     String sessionId = generateSessionId();
@@ -213,19 +212,19 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
    * @param message The message.
    * @param outputDataClass The class of the output data.
    * @param <T> The type of the output data.
-   * @return Null if there is no user data to extract.
+   * @return Null if there is no output data to extract.
    */
   private <T> T extractOutputData(MessageDto message, Class<T> outputDataClass) {
     if (outputDataClass == null) {
       return null;
     }
     Gson parser = JsonUtil.getParser();
-    String userOutputJsonData =
+    String outputDataJson =
         parser
             .fromJson(message.getBody(), JsonObject.class)
             .get(JsonProperty.OUTPUT_DATA.name())
             .getAsString();
-    return parser.fromJson(userOutputJsonData, outputDataClass);
+    return parser.fromJson(outputDataJson, outputDataClass);
   }
 
   /**
