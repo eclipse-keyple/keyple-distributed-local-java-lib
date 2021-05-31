@@ -14,7 +14,8 @@ package org.eclipse.keyple.distributed;
 import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtension;
 
 /**
- * API of the <b>Local Service Server</b> associated to the <b>Remote Plugin Client</b>.
+ * API of the <b>Local Service Server</b> associated to a <b>Remote Plugin Client</b> to be used in
+ * the <b>Reader Server Side</b> configuration mode.
  *
  * <p>This service must be started by the application installed on a <b>Server</b> having local
  * access to the smart card reader but wishes to delegate all or part of the ticketing processing to

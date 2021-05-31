@@ -14,7 +14,8 @@ package org.eclipse.keyple.distributed;
 import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtension;
 
 /**
- * API of the <b>Local Service Client</b> associated to the <b>Remote Plugin Server</b>.
+ * API of the <b>Local Service Client</b> associated to a <b>Remote Plugin Server</b> to be used in
+ * the <b>Reader Client Side</b> configuration mode.
  *
  * <p>This service must be started by the application installed on a <b>Client</b> having local
  * access to the smart card reader but wishes to delegate all or part of the ticketing processing to
@@ -45,6 +46,13 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
 
   /**
    * Executes on a local reader a specific ticketing service remotely from the server.
+   *
+   * <p>A remote reader associated with the local reader is created during the transaction. Thus,
+   * the remote application will be able to transparently interact directly with the local reader
+   * via the remote reader.
+   *
+   * <p><u>Note</u> : The associated remote reader is not observable. If it is necessary to observe
+   * the local reader, it is the responsibility of the local application to do so.
    *
    * @param serviceId The ticketing service ID. It will permit to indicate to the server which
    *     ticketing service to execute (Materialization, Validation, Control, etc...). This field is
