@@ -2,11 +2,11 @@
 
 ## Overview
 
-The **Keyple Distributed Local** Java library is one of the two main libraries provided by the **Keyple Distributed** solution (the other one is [Keyple Java Distributed Remote](https://github.com/eclipse/keyple-java-distributed-remote)).
+The **Keyple Distributed Local** Java library is one of the two main libraries provided by the **Keyple Distributed** solution (the other one is [Keyple Java Distributed Remote](https://github.com/eclipse/keyple-distributed-remote-java-lib)).
 
 It must be imported and used by the application installed on the terminal having local access to the smart card reader but wishes to delegate all or part of the ticketing processing to a remote application.
 
-It is important to note that it uses and exposes the APIs exposed by the library [Keyple Java Distributed Network](https://github.com/eclipse/keyple-java-distributed-network).
+It is important to note that it uses and exposes the APIs exposed by the library [Keyple Java Distributed Network](https://github.com/eclipse/keyple-distributed-network-java-lib).
 
 ## User Guide & Download Information
 
