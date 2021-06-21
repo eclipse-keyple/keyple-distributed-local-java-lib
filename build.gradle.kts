@@ -12,6 +12,7 @@ buildscript {
         mavenLocal()
         maven(url = "https://repo.eclipse.org/service/local/repositories/maven_central/content")
         mavenCentral()
+        maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
     }
     dependencies {
         classpath("org.eclipse.keyple:keyple-gradle:0.2.+")
@@ -37,6 +38,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.5")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.assertj:assertj-core:3.15.0")
+    testImplementation("org.mockito:mockito-core:2.28.2")
+    testImplementation("org.slf4j:slf4j-simple:1.7.25")
 }
 
 val javaSourceLevel: String by project

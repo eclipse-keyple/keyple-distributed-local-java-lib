@@ -60,7 +60,8 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
   public LocalServiceSpi getLocalService() {
 
     // Create the local service.
-    LocalServiceServerAdapter localService = new LocalServiceServerAdapter(getLocalServiceName());
+    LocalServiceServerAdapter localService =
+        new LocalServiceServerAdapter(getLocalServiceName(), poolPluginNames);
 
     // Bind the node.
     String nodeType = asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer";
