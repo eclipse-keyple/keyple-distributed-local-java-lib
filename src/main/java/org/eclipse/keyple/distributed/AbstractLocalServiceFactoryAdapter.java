@@ -11,7 +11,7 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
-import org.eclipse.keyple.core.common.CommonsApiProperties;
+import org.eclipse.keyple.core.common.CommonApiProperties;
 import org.eclipse.keyple.core.distributed.local.DistributedLocalApiProperties;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceFactorySpi;
 
@@ -52,8 +52,8 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
    * @since 2.0
    */
   @Override
-  public final String getCommonsApiVersion() {
-    return CommonsApiProperties.VERSION;
+  public final String getCommonApiVersion() {
+    return CommonApiProperties.VERSION;
   }
 
   /**

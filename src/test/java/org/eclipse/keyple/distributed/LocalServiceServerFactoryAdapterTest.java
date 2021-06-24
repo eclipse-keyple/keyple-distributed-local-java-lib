@@ -42,9 +42,9 @@ public class LocalServiceServerFactoryAdapterTest {
   }
 
   @Test
-  public void getCommonsApiVersion_shouldReturnANotEmptyValue() {
-    assertThat(syncFactory.getCommonsApiVersion()).isNotEmpty();
-    assertThat(asyncFactory.getCommonsApiVersion()).isNotEmpty();
+  public void getCommonApiVersion_shouldReturnANotEmptyValue() {
+    assertThat(syncFactory.getCommonApiVersion()).isNotEmpty();
+    assertThat(asyncFactory.getCommonApiVersion()).isNotEmpty();
   }
 
   @Test
