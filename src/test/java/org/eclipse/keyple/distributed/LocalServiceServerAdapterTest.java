@@ -12,8 +12,7 @@
 package org.eclipse.keyple.distributed;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
@@ -112,8 +111,8 @@ public class LocalServiceServerAdapterTest {
 
   @Test
   public void getNode_shouldReturnANotNullInstance() {
-    assertThat(syncService.getNode()).isNotNull().isInstanceOf(SyncNodeServerAdapter.class);
-    assertThat(asyncService.getNode()).isNotNull().isInstanceOf(AsyncNodeServerAdapter.class);
+    assertThat(syncService.getNode()).isInstanceOf(SyncNodeServerAdapter.class);
+    assertThat(asyncService.getNode()).isInstanceOf(AsyncNodeServerAdapter.class);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -124,7 +123,7 @@ public class LocalServiceServerAdapterTest {
   @Test
   public void getSyncNode_whenSync_shouldReturnANotNullInstance() {
     SyncNodeServer node = syncService.getSyncNode();
-    assertThat(node).isNotNull().isInstanceOf(SyncNodeServerAdapter.class);
+    assertThat(node).isInstanceOf(SyncNodeServerAdapter.class);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -135,17 +134,20 @@ public class LocalServiceServerAdapterTest {
   @Test
   public void getAsyncNode_whenAsync_shouldReturnANotNullInstance() {
     AsyncNodeServer node = asyncService.getAsyncNode();
-    assertThat(node).isNotNull().isInstanceOf(AsyncNodeServerAdapter.class);
+    assertThat(node).isInstanceOf(AsyncNodeServerAdapter.class);
   }
 
   @Test
-  public void onPluginEvent_shouldInvokeSendMessageOnNode() {
-    // syncService.onPluginEvent(LOCAL_READER_NAME, );
+  public void onPluginEvent_whenNoPluginClientIsReferenced_shouldNotInvokeSendMessageOnEndpoint() {
+    syncService.onPluginEvent(LOCAL_READER_NAME, "eventData");
+    asyncService.onPluginEvent(LOCAL_READER_NAME, "eventData");
+    verifyZeroInteractions(asyncEndpointServerSpi);
   }
 
   @Test
-  public void onReaderEvent() {}
-
-  @Test
-  public void onMessage() {}
+  public void onReaderEvent_whenNoReaderClientIsReferenced_shouldNotInvokeSendMessageOnEndpoint() {
+    syncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
+    asyncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
+    verifyZeroInteractions(asyncEndpointServerSpi);
+  }
 }

@@ -133,8 +133,8 @@ public class LocalServiceClientAdapterTest {
 
   @Test
   public void getNode_shouldReturnANotNullInstance() {
-    assertThat(syncService.getNode()).isNotNull().isInstanceOf(SyncNodeClientAdapter.class);
-    assertThat(asyncService.getNode()).isNotNull().isInstanceOf(AsyncNodeClientAdapter.class);
+    assertThat(syncService.getNode()).isInstanceOf(SyncNodeClientAdapter.class);
+    assertThat(asyncService.getNode()).isInstanceOf(AsyncNodeClientAdapter.class);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -145,7 +145,7 @@ public class LocalServiceClientAdapterTest {
   @Test
   public void getAsyncNode_whenAsync_shouldReturnANotNullInstance() {
     AsyncNodeClient node = asyncService.getAsyncNode();
-    assertThat(node).isNotNull().isInstanceOf(AsyncNodeClientAdapter.class);
+    assertThat(node).isInstanceOf(AsyncNodeClientAdapter.class);
   }
 
   @Test(expected = IllegalArgumentException.class)

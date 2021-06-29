@@ -11,8 +11,15 @@
  ************************************************************************************** */
 package org.eclipse.keyple.distributed;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.util.json.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
@@ -23,7 +30,12 @@ import org.eclipse.keyple.core.util.json.JsonUtil;
 final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     implements LocalServiceServer {
 
+  private static final Logger logger = LoggerFactory.getLogger(LocalServiceServerAdapter.class);
+
   private final String[] poolPluginNames;
+  private final Set<ClientInfo> pluginClients;
+  private final Map<String, Set<ClientInfo>> readerClients;
+  private final Object readerClientsMonitor;
 
   /**
    * (package-private)<br>
@@ -36,6 +48,9 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   LocalServiceServerAdapter(String localServiceName, String... poolPluginNames) {
     super(localServiceName);
     this.poolPluginNames = poolPluginNames;
+    this.pluginClients = Collections.newSetFromMap(new ConcurrentHashMap<ClientInfo, Boolean>(1));
+    this.readerClients = new ConcurrentHashMap<String, Set<ClientInfo>>(1);
+    this.readerClientsMonitor = new Object();
   }
 
   /**
@@ -45,9 +60,8 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public SyncNodeServer getSyncNode() {
-    AbstractNodeAdapter node = getNode();
-    if (node instanceof SyncNodeServer) {
-      return (SyncNodeServer) node;
+    if (isBoundToSyncNode()) {
+      return (SyncNodeServer) getNode();
     }
     throw new IllegalStateException(
         String.format(
@@ -62,9 +76,8 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public AsyncNodeServer getAsyncNode() {
-    AbstractNodeAdapter node = getNode();
-    if (node instanceof AsyncNodeServer) {
-      return (AsyncNodeServer) node;
+    if (!isBoundToSyncNode()) {
+      return (AsyncNodeServer) getNode();
     }
     throw new IllegalStateException(
         String.format(
@@ -90,7 +103,20 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public void onPluginEvent(String readerName, String jsonData) {
-    sendMessage(MessageDto.Action.PLUGIN_EVENT, readerName, jsonData);
+    Set<ClientInfo> pluginClientsCopy = new HashSet<ClientInfo>(pluginClients);
+    for (ClientInfo clientInfo : pluginClientsCopy) {
+      try {
+        sendMessage(MessageDto.Action.PLUGIN_EVENT, readerName, jsonData, clientInfo);
+      } catch (Exception e) {
+        pluginClients.remove(clientInfo);
+        logger.warn(
+            "Client of plugin event is de-referenced due to an unexpected error : readerName={}, clientNodeId={}, sessionId={}, error={}",
+            readerName,
+            clientInfo.clientNodeId,
+            clientInfo.sessionId,
+            e.getMessage());
+      }
+    }
   }
 
   /**
@@ -100,31 +126,46 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public void onReaderEvent(String readerName, String jsonData) {
-    sendMessage(MessageDto.Action.READER_EVENT, readerName, jsonData);
+    Set<ClientInfo> readerClientsRef = readerClients.get(readerName);
+    if (readerClientsRef == null) {
+      return;
+    }
+    Set<ClientInfo> readerClientsCopy = new HashSet<ClientInfo>(readerClientsRef);
+    for (ClientInfo clientInfo : readerClientsCopy) {
+      try {
+        sendMessage(MessageDto.Action.READER_EVENT, readerName, jsonData, clientInfo);
+      } catch (Exception e) {
+        readerClientsRef.remove(clientInfo);
+        logger.warn(
+            "Client of reader event is de-referenced due to an unexpected error : readerName={}, clientNodeId={}, sessionId={}, error={}",
+            readerName,
+            clientInfo.clientNodeId,
+            clientInfo.sessionId,
+            e.getMessage());
+      }
+    }
   }
 
   /**
    * (private)<br>
-   * Sends a message associated to a new session ID using the provided reader name for local and
-   * remote reader.
+   * Sends a message using the provided reader name for local and remote reader.
    *
    * @param action The action.
    * @param readerName The reader name (local and remote).
    * @param jsonData The body content.
+   * @param clientInfo The client information.
    */
-  private void sendMessage(MessageDto.Action action, String readerName, String jsonData) {
-
-    // Build a plugin event message with a new session ID.
-    MessageDto message =
-        new MessageDto()
-            .setAction(action.name())
-            .setLocalReaderName(readerName)
-            .setRemoteReaderName(readerName)
-            .setSessionId(generateSessionId())
-            .setBody(jsonData);
-
-    // Send the message.
-    getNode().sendMessage(message);
+  private void sendMessage(
+      MessageDto.Action action, String readerName, String jsonData, ClientInfo clientInfo) {
+    getNode()
+        .sendMessage(
+            new MessageDto()
+                .setAction(action.name())
+                .setLocalReaderName(readerName)
+                .setRemoteReaderName(readerName)
+                .setClientNodeId(clientInfo.clientNodeId)
+                .setSessionId(clientInfo.sessionId)
+                .setBody(jsonData));
   }
 
   /**
@@ -134,6 +175,9 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   void onMessage(MessageDto message) {
+
+    // Register the client for events management.
+    registerClient(message);
 
     MessageDto result;
     try {
@@ -154,5 +198,76 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
 
     // Send the response.
     getNode().sendMessage(result);
+  }
+
+  /**
+   * (private)<br>
+   * Registers a client.
+   *
+   * @param message The incoming message.
+   */
+  private void registerClient(MessageDto message) {
+
+    if (message.getLocalReaderName() != null) {
+      // Reader command
+      Set<ClientInfo> readerClientInfos = readerClients.get(message.getLocalReaderName());
+      if (readerClientInfos == null) {
+        synchronized (readerClientsMonitor) {
+          readerClientInfos = readerClients.get(message.getLocalReaderName());
+          if (readerClientInfos == null) {
+            readerClientInfos =
+                Collections.newSetFromMap(new ConcurrentHashMap<ClientInfo, Boolean>(1));
+            readerClients.put(message.getLocalReaderName(), readerClientInfos);
+          }
+        }
+      }
+      readerClientInfos.add(new ClientInfo(message.getClientNodeId(), message.getSessionId()));
+
+    } else {
+      // Plugin command
+      pluginClients.add(new ClientInfo(message.getClientNodeId(), message.getSessionId()));
+    }
+  }
+
+  /**
+   * (private)<br>
+   * Client info.
+   */
+  private static class ClientInfo {
+
+    private String clientNodeId;
+    private String sessionId;
+
+    private ClientInfo(String clientNodeId, String sessionId) {
+      this.clientNodeId = clientNodeId;
+      this.sessionId = sessionId;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Comparison is based on "clientNodeId" field.
+     *
+     * @since 2.0
+     */
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ClientInfo that = (ClientInfo) o;
+      return clientNodeId.equals(that.clientNodeId);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Hash code is based on "clientNodeId" field.
+     *
+     * @since 2.0
+     */
+    @Override
+    public int hashCode() {
+      return clientNodeId.hashCode();
+    }
   }
 }

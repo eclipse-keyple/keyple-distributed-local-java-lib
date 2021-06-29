@@ -60,6 +60,8 @@ public final class LocalServiceClientFactoryBuilder {
     /**
      * Configures the service with a {@link AsyncNodeClient} node.
      *
+     * <p>A new network channel is opened for each remote service execution.
+     *
      * @param endpoint The {@link AsyncEndpointClientSpi} network endpoint to use.
      * @param timeoutSeconds This timeout (in seconds) defines how long the async client waits for a
      *     server order before cancelling the global transaction.

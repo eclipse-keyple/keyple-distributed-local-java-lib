@@ -50,9 +50,8 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public AsyncNodeClient getAsyncNode() {
-    AbstractNodeAdapter node = getNode();
-    if (node instanceof AsyncNodeClient) {
-      return (AsyncNodeClient) node;
+    if (!isBoundToSyncNode()) {
+      return (AsyncNodeClient) getNode();
     }
     throw new IllegalStateException(
         String.format(
