@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class LocalServiceServerFactoryBuilderTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
   static AsyncEndpointServerSpi asyncEndpointServerSpi;
 
   @BeforeClass
@@ -42,22 +42,6 @@ public class LocalServiceServerFactoryBuilderTest {
   @Test(expected = IllegalArgumentException.class)
   public void builder_whenAsyncNodeAndEndpointIsNull_shouldThrowIAE() {
     LocalServiceServerFactoryBuilder.builder(SERVICE_NAME).withAsyncNode(null).build();
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void builder_whenSyncNodeAndPoolPluginsNameContainsNull_shouldThrowIAE() {
-    LocalServiceServerFactoryBuilder.builder(SERVICE_NAME)
-        .withSyncNode()
-        .withPoolPlugins(null)
-        .build();
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void builder_whenAsyncNodeAndPoolPluginsNameContainsNull_shouldThrowIAE() {
-    LocalServiceServerFactoryBuilder.builder(SERVICE_NAME)
-        .withAsyncNode(asyncEndpointServerSpi)
-        .withPoolPlugins(null)
-        .build();
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class LocalServiceServerAdapterTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
   static final String SERVICE_ID = "serviceId";
   static final String LOCAL_READER_NAME = "localReaderName";
   static final String COMMAND = "command";

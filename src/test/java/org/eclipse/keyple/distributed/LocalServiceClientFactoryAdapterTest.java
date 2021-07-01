@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class LocalServiceClientFactoryAdapterTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
 
   static SyncEndpointClientSpi syncEndpointClientSpi;
   static AsyncEndpointClientSpi asyncEndpointClientSpi;
@@ -66,13 +66,11 @@ public class LocalServiceClientFactoryAdapterTest {
   }
 
   @Test
-  public void getLocalService_whenSync_shouldReturnANotNullInstance() {
+  public void getLocalService_shouldReturnANotNullInstance() {
     assertThat(syncFactory.getLocalService())
-        .isNotNull()
         .isInstanceOf(LocalServiceClient.class)
         .isInstanceOf(LocalServiceClientAdapter.class);
     assertThat(asyncFactory.getLocalService())
-        .isNotNull()
         .isInstanceOf(LocalServiceClient.class)
         .isInstanceOf(LocalServiceClientAdapter.class);
   }

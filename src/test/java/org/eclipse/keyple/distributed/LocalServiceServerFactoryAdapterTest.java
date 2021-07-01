@@ -20,7 +20,7 @@ import org.junit.Test;
 
 public class LocalServiceServerFactoryAdapterTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
 
   static AsyncEndpointServerSpi asyncEndpointServerSpi;
 

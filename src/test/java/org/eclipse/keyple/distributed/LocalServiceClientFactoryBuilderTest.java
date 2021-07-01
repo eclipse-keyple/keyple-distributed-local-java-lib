@@ -22,7 +22,7 @@ import org.junit.Test;
 
 public class LocalServiceClientFactoryBuilderTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
   static SyncEndpointClientSpi syncEndpointClientSpi;
   static AsyncEndpointClientSpi asyncEndpointClientSpi;
 

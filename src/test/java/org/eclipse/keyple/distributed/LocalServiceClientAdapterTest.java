@@ -16,20 +16,18 @@ import static org.eclipse.keyple.distributed.MessageDto.*;
 import static org.mockito.Mockito.*;
 
 import com.google.gson.JsonObject;
-import java.util.Arrays;
+import java.util.Collections;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.util.json.JsonUtil;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointClientSpi;
 import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
 public class LocalServiceClientAdapterTest {
 
-  static final String SERVICE_NAME = "serviceName";
+  static final String SERVICE_NAME = "SERVICE_NAME";
   static final String SERVICE_ID = "serviceId";
   static final String LOCAL_READER_NAME = "localReaderName";
   static final String COMMAND = "command";
@@ -78,7 +76,7 @@ public class LocalServiceClientAdapterTest {
     localServiceApi = mock(LocalServiceApi.class);
 
     syncEndpointClientSpi = mock(SyncEndpointClientSpi.class);
-    doReturn(Arrays.asList(endRemoteServiceMessage))
+    doReturn(Collections.singletonList(endRemoteServiceMessage))
         .when(syncEndpointClientSpi)
         .sendRequest(ArgumentMatchers.<MessageDto>any());
     syncFactory =
@@ -96,12 +94,6 @@ public class LocalServiceClientAdapterTest {
                 .build();
     asyncService = (LocalServiceClientAdapter) asyncFactory.getLocalService();
   }
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
 
   @Test
   public void getLocalServiceApi_whenConnectNotInvoked_shouldReturnNull() {
