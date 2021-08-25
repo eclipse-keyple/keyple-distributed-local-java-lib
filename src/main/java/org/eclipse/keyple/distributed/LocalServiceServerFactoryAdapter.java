@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * (package-private)<br>
  * Adapter of {@link LocalServiceServerFactory}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactoryAdapter
     implements LocalServiceServerFactory, KeypleDistributedLocalServiceExtensionFactory {
@@ -40,7 +40,7 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
    * @param localServiceName The name of the local service to build.
    * @param asyncEndpointServerSpi The async endpoint server to bind.
    * @param poolPluginNames One or more pool plugin names to bind (for pool only).
-   * @since 2.0
+   * @since 2.0.0
    */
   LocalServiceServerFactoryAdapter(
       String localServiceName,
@@ -54,7 +54,7 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public LocalServiceSpi getLocalService() {

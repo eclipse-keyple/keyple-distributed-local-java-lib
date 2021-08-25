@@ -18,7 +18,7 @@ import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
 /**
  * Builder of {@link LocalServiceClientFactory}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public final class LocalServiceClientFactoryBuilder {
 
@@ -34,7 +34,7 @@ public final class LocalServiceClientFactoryBuilder {
    * @param localServiceName The identifier of the local service.
    * @return Next configuration step.
    * @throws IllegalArgumentException If the service name is null or empty.
-   * @since 2.0
+   * @since 2.0.0
    */
   public static NodeStep builder(String localServiceName) {
     return new Builder(localServiceName);
@@ -43,7 +43,7 @@ public final class LocalServiceClientFactoryBuilder {
   /**
    * Step to configure the node associated with the service.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   public interface NodeStep {
 
@@ -53,7 +53,7 @@ public final class LocalServiceClientFactoryBuilder {
      * @param endpoint The {@link SyncEndpointClientSpi} network endpoint to use.
      * @return Next configuration step.
      * @throws IllegalArgumentException If the provided endpoint is null.
-     * @since 2.0
+     * @since 2.0.0
      */
     BuilderStep withSyncNode(SyncEndpointClientSpi endpoint);
 
@@ -67,7 +67,7 @@ public final class LocalServiceClientFactoryBuilder {
      *     server order before cancelling the global transaction.
      * @return Next configuration step.
      * @throws IllegalArgumentException If the endpoint is null or the timeout {@code <} 1.
-     * @since 2.0
+     * @since 2.0.0
      */
     BuilderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds);
   }
@@ -75,7 +75,7 @@ public final class LocalServiceClientFactoryBuilder {
   /**
    * Last step : build a new instance.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   public interface BuilderStep {
 
@@ -83,7 +83,7 @@ public final class LocalServiceClientFactoryBuilder {
      * Creates a new instance of {@link LocalServiceClientFactory} using the current configuration.
      *
      * @return A not null reference.
-     * @since 2.0
+     * @since 2.0.0
      */
     LocalServiceClientFactory build();
   }
@@ -107,7 +107,7 @@ public final class LocalServiceClientFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public BuilderStep withSyncNode(SyncEndpointClientSpi endpoint) {
@@ -119,7 +119,7 @@ public final class LocalServiceClientFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public BuilderStep withAsyncNode(AsyncEndpointClientSpi endpoint, int timeoutSeconds) {
@@ -134,7 +134,7 @@ public final class LocalServiceClientFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public LocalServiceClientFactory build() {

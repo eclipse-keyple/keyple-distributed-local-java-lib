@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * (package-private)<br>
  * Adapter of {@link LocalServiceServer}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     implements LocalServiceServer {
@@ -43,7 +43,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    *
    * @param localServiceName The name of the local service to build.
    * @param poolPluginNames One or more pool plugin names to bind (for pool only).
-   * @since 2.0
+   * @since 2.0.0
    */
   LocalServiceServerAdapter(String localServiceName, String... poolPluginNames) {
     super(localServiceName);
@@ -56,7 +56,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public SyncNodeServer getSyncNode() {
@@ -72,7 +72,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public AsyncNodeServer getAsyncNode() {
@@ -88,7 +88,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void connect(LocalServiceApi localServiceApi) {
@@ -99,7 +99,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void onPluginEvent(String readerName, String jsonData) {
@@ -122,7 +122,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void onReaderEvent(String readerName, String jsonData) {
@@ -171,7 +171,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   void onMessage(MessageDto message) {
@@ -248,7 +248,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
      *
      * <p>Comparison is based on "clientNodeId" field.
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public boolean equals(Object o) {
@@ -263,7 +263,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
      *
      * <p>Hash code is based on "clientNodeId" field.
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public int hashCode() {

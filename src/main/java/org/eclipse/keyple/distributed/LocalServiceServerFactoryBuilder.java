@@ -17,7 +17,7 @@ import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
 /**
  * Builder of {@link LocalServiceServerFactory}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public final class LocalServiceServerFactoryBuilder {
 
@@ -33,7 +33,7 @@ public final class LocalServiceServerFactoryBuilder {
    * @param localServiceName The identifier of the local service.
    * @return Next configuration step.
    * @throws IllegalArgumentException If the service name is null or empty.
-   * @since 2.0
+   * @since 2.0.0
    */
   public static NodeStep builder(String localServiceName) {
     return new Builder(localServiceName);
@@ -42,7 +42,7 @@ public final class LocalServiceServerFactoryBuilder {
   /**
    * Step to configure the node associated with the service.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   public interface NodeStep {
 
@@ -50,7 +50,7 @@ public final class LocalServiceServerFactoryBuilder {
      * Configures the service with a {@link SyncNodeServer} node.
      *
      * @return Next configuration step.
-     * @since 2.0
+     * @since 2.0.0
      */
     BuilderStep withSyncNode();
 
@@ -60,7 +60,7 @@ public final class LocalServiceServerFactoryBuilder {
      * @param endpoint The {@link AsyncEndpointServerSpi} network endpoint to use.
      * @return Next configuration step.
      * @throws IllegalArgumentException If the endpoint is null.
-     * @since 2.0
+     * @since 2.0.0
      */
     BuilderStep withAsyncNode(AsyncEndpointServerSpi endpoint);
   }
@@ -68,7 +68,7 @@ public final class LocalServiceServerFactoryBuilder {
   /**
    * Last step : build a new instance.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   public interface BuilderStep {
 
@@ -80,7 +80,7 @@ public final class LocalServiceServerFactoryBuilder {
      * @return Next configuration step.
      * @throws IllegalArgumentException If no pool plugin name is set or if some names are null or
      *     empty.
-     * @since 2.0
+     * @since 2.0.0
      */
     BuilderStep withPoolPlugins(String... poolPluginNames);
 
@@ -88,7 +88,7 @@ public final class LocalServiceServerFactoryBuilder {
      * Creates a new instance of {@link LocalServiceServerFactory} using the current configuration.
      *
      * @return A not null reference.
-     * @since 2.0
+     * @since 2.0.0
      */
     LocalServiceServerFactory build();
   }
@@ -111,7 +111,7 @@ public final class LocalServiceServerFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public BuilderStep withSyncNode() {
@@ -121,7 +121,7 @@ public final class LocalServiceServerFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public BuilderStep withAsyncNode(AsyncEndpointServerSpi endpoint) {
@@ -133,7 +133,7 @@ public final class LocalServiceServerFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public BuilderStep withPoolPlugins(String... poolPluginNames) {
@@ -148,7 +148,7 @@ public final class LocalServiceServerFactoryBuilder {
     /**
      * {@inheritDoc}
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     @Override
     public LocalServiceServerFactory build() {

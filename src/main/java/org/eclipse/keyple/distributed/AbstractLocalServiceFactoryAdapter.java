@@ -19,7 +19,7 @@ import org.eclipse.keyple.core.distributed.local.spi.LocalServiceFactorySpi;
  * (package-private)<br>
  * Abstract class of all local service factory adapters.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactorySpi {
 
@@ -30,7 +30,7 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
-   * @since 2.0
+   * @since 2.0.0
    */
   AbstractLocalServiceFactoryAdapter(String localServiceName) {
     this.localServiceName = localServiceName;
@@ -39,7 +39,7 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getDistributedLocalApiVersion() {
@@ -49,7 +49,7 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getCommonApiVersion() {
@@ -59,7 +59,7 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getLocalServiceName() {

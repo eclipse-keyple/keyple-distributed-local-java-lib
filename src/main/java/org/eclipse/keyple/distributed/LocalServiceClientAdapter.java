@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * (package-private)<br>
  * Adapter of {@link LocalServiceClient}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     implements LocalServiceClient {
@@ -36,7 +36,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
-   * @since 2.0
+   * @since 2.0.0
    */
   LocalServiceClientAdapter(String localServiceName) {
 
@@ -46,7 +46,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public AsyncNodeClient getAsyncNode() {
@@ -62,7 +62,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public <T> T executeRemoteService(
@@ -228,7 +228,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void onPluginEvent(String readerName, String jsonData) {
@@ -238,7 +238,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void onReaderEvent(String readerName, String jsonData) {
@@ -248,7 +248,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   void onMessage(MessageDto messageDto) {

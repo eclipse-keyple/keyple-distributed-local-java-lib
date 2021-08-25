@@ -30,7 +30,7 @@ import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtension;
  *   <li>To <b>stop</b> the service, unregister it from the Keyple service.
  * </ul>
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public interface LocalServiceServer extends KeypleDistributedLocalServiceExtension {
 
@@ -41,7 +41,7 @@ public interface LocalServiceServer extends KeypleDistributedLocalServiceExtensi
    * @return A not null reference.
    * @throws IllegalStateException If the service is not configured with a synchronous network
    *     protocol.
-   * @since 2.0
+   * @since 2.0.0
    */
   SyncNodeServer getSyncNode();
 
@@ -52,7 +52,7 @@ public interface LocalServiceServer extends KeypleDistributedLocalServiceExtensi
    * @return A not null reference.
    * @throws IllegalStateException If the service is not configured with an asynchronous network
    *     protocol.
-   * @since 2.0
+   * @since 2.0.0
    */
   AsyncNodeServer getAsyncNode();
 }

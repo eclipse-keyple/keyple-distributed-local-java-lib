@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * (package-private)<br>
  * Adapter of {@link LocalServiceClientFactory}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactoryAdapter
     implements LocalServiceClientFactory {
@@ -41,7 +41,7 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
    * @param syncEndpointClientSpi The sync endpoint client to bind.
    * @param asyncEndpointClientSpi The async endpoint client to bind.
    * @param asyncNodeClientTimeoutSeconds The async node client timeout (in seconds).
-   * @since 2.0
+   * @since 2.0.0
    */
   LocalServiceClientFactoryAdapter(
       String localServiceName,
@@ -57,7 +57,7 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public LocalServiceSpi getLocalService() {

@@ -29,7 +29,7 @@ import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtension;
  *   <li>To <b>stop</b> the service, unregister it from the Keyple service.
  * </ul>
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public interface LocalServiceClient extends KeypleDistributedLocalServiceExtension {
 
@@ -40,7 +40,7 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
    * @return A not null reference.
    * @throws IllegalStateException If the service is not configured with an asynchronous network
    *     protocol.
-   * @since 2.0
+   * @since 2.0.0
    */
   AsyncNodeClient getAsyncNode();
 
@@ -74,7 +74,7 @@ public interface LocalServiceClient extends KeypleDistributedLocalServiceExtensi
    *     returned server output data is null.
    * @throws IllegalArgumentException If the service ID or the local reader name are null or empty.
    * @throws IllegalStateException If the local reader is not registered.
-   * @since 2.0
+   * @since 2.0.0
    */
   <T> T executeRemoteService(
       String serviceId,

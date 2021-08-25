@@ -17,6 +17,6 @@ import org.eclipse.keyple.core.common.KeypleDistributedLocalServiceExtensionFact
  * Factory of {@link LocalServiceClient} to provide to the Keyple main service during the
  * registration process.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public interface LocalServiceClientFactory extends KeypleDistributedLocalServiceExtensionFactory {}
