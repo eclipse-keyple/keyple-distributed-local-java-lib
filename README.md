@@ -12,9 +12,9 @@ It uses the common library [Keyple Distributed Network Java Lib](https://github.
 
 The full documentation, including the **user guide**, **download information** and **contribution guide**, is available on the Keyple website [keyple.org](https://keyple.org).
 
-## Javadoc
+## API documentation
 
-The javadoc is available online: [eclipse.github.io/keyple-distributed-local-java-lib/](https://eclipse.github.io/keyple-distributed-local-java-lib/)
+API documentation & class diagram is available online: [eclipse.github.io/keyple-distributed-local-java-lib](https://eclipse.github.io/keyple-distributed-local-java-lib)
 
 ## Examples
 

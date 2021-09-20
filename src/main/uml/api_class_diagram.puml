@@ -1,0 +1,143 @@
+@startuml
+title
+    Keyple 2.0 - keyple-distributed-local-java-lib - 2.0.0 (10/06/2021)
+end title
+
+' == THEME ==
+
+'Couleurs issues de : https://htmlcolorcodes.com/fr/tableau-de-couleur/tableau-de-couleur-design-plat/
+!define C_GREY1 F8F9F9
+!define C_GREY2 F2F3F4
+!define C_GREY3 E5E7E9
+!define C_GREY4 D7DBDD
+!define C_GREY5 CACFD2
+!define C_GREY6 BDC3C7
+!define C_LINK 3498DB
+!define C_USE 27AE60
+
+skinparam Shadowing false
+skinparam ClassFontStyle italic
+skinparam ClassBorderColor #D4AC0D
+skinparam stereotypeABorderColor #A9DCDF
+skinparam stereotypeIBorderColor #B4A7E5
+skinparam stereotypeCBorderColor #ADD1B2
+skinparam stereotypeEBorderColor #EB93DF
+' Red
+skinparam ClassBackgroundColor<<red>> #FDEDEC
+skinparam ClassBorderColor<<red>> #E74C3C
+hide <<red>> stereotype
+' Purple
+skinparam ClassBackgroundColor<<purple>> #F4ECF7
+skinparam ClassBorderColor<<purple>> #8E44AD
+hide <<purple>> stereotype
+' blue
+skinparam ClassBackgroundColor<<blue>> #EBF5FB
+skinparam ClassBorderColor<<blue>> #3498DB
+hide <<blue>> stereotype
+' Green
+skinparam ClassBackgroundColor<<green>> #E9F7EF
+skinparam ClassBorderColor<<green>> #27AE60
+hide <<green>> stereotype
+' Grey
+skinparam ClassBackgroundColor<<grey>> #EAECEE
+skinparam ClassBorderColor<<grey>> #2C3E50
+hide <<grey>> stereotype
+
+' == CONTENT ==
+
+legend top
+    __Colors legend__ :
+    * __Configuration modes__ :
+    ** <back:lightGreen>**Reader Client Side**</back> (Local Service on **Client**)
+    ** <back:plum>**Reader Server Side**</back> (Local Service on **Server**)
+    * __External API references__ :
+    ** <back:yellow>**keyple-distributed-network-java-lib**</back>
+    ** <back:cyan>**keyple-common-java-api**</back>
+end legend
+
+package "org.eclipse.keyple.distributed" as root {
+
+    +interface "<<<back:cyan>KeypleDistributedLocalServiceExtension</back>>>\nLocalServiceClient" as LocalServiceClient {
+        --
+        +<back:yellow>AsyncNodeClient</back> getAsyncNode ()
+
+        +<T> T executeRemoteService (
+            \tString serviceId,
+            \tString localReaderName,
+            \tObject initialCardContent,
+            \tObject inputData,
+            \tClass<T> outputDataClass)
+    }
+
+    +interface "<<<back:cyan>KeypleDistributedLocalServiceExtension</back>>>\nLocalServiceServer" as LocalServiceServer {
+        +<back:yellow>SyncNodeServer</back> getSyncNode ()
+        +<back:yellow>AsyncNodeServer</back> getAsyncNode ()
+    }
+
+    ' Factories
+    together {
+        +interface "<<<back:cyan>KeypleDistributedLocalServiceExtensionFactory</back>>>\nLocalServiceClientFactory" as LocalServiceClientFactory {
+        }
+        +interface "<<<back:cyan>KeypleDistributedLocalServiceExtensionFactory</back>>>\nLocalServiceServerFactory" as LocalServiceServerFactory {
+        }
+    }
+
+    ' Factories builders
+    together {
+        +class "**final** LocalServiceClientFactoryBuilder" as LocalServiceClientFactoryBuilder {
+            + {static} NodeStep builder (String localServiceName)
+        }
+        +interface "NodeStep" as LocalServiceClientFactoryNodeStep {
+            + BuilderStep withSyncNode (<back:yellow>SyncEndpointClientSpi</back> endpoint)
+            + BuilderStep withAsyncNode (<back:yellow>AsyncEndpointClientSpi</back> endpoint, int timeoutSeconds)
+        }
+        +interface "BuilderStep" as LocalServiceClientFactoryBuilderStep {
+            + LocalServiceClientFactory build ()
+        }
+
+        +class "**final** LocalServiceServerFactoryBuilder" as LocalServiceServerFactoryBuilder {
+            + {static} NodeStep builder (String localServiceName)
+        }
+        +interface "NodeStep" as LocalServiceServerFactoryNodeStep {
+            + BuilderStep withSyncNode ()
+            + BuilderStep withAsyncNode (<back:yellow>AsyncEndpointServerSpi</back> endpoint)
+        }
+        +interface "BuilderStep" as LocalServiceServerFactoryBuilderStep {
+            + BuilderStep withPoolPlugins (String... poolPluginNames)
+            + LocalServiceServerFactory build ()
+        }
+    }
+}
+
+' Associations
+
+LocalServiceClientFactoryBuilder ..> LocalServiceClientFactoryNodeStep #C_LINK : provide >
+LocalServiceClientFactoryNodeStep ..> LocalServiceClientFactoryBuilderStep #C_LINK
+LocalServiceClientFactoryBuilderStep ..> LocalServiceClientFactory #C_LINK : create >
+LocalServiceClientFactory ..> LocalServiceClient #C_LINK : create >
+
+LocalServiceServerFactoryBuilder ..> LocalServiceServerFactoryNodeStep #C_LINK : provide >
+LocalServiceServerFactoryNodeStep ..> LocalServiceServerFactoryBuilderStep #C_LINK
+LocalServiceServerFactoryBuilderStep ..> LocalServiceServerFactoryBuilderStep #C_LINK
+LocalServiceServerFactoryBuilderStep ..> LocalServiceServerFactory #C_LINK : create >
+LocalServiceServerFactory ..> LocalServiceServer #C_LINK : create >
+
+' == LAYOUT ==
+
+' == STYLE ==
+
+package root #C_GREY1 {}
+
+interface LocalServiceClient <<green>>
+interface LocalServiceClientFactory <<green>>
+class LocalServiceClientFactoryBuilder <<green>>
+interface LocalServiceClientFactoryNodeStep <<green>>
+interface LocalServiceClientFactoryBuilderStep <<green>>
+
+interface LocalServiceServer <<purple>>
+interface LocalServiceServerFactory <<purple>>
+class LocalServiceServerFactoryBuilder <<purple>>
+interface LocalServiceServerFactoryNodeStep <<purple>>
+interface LocalServiceServerFactoryBuilderStep <<purple>>
+
+@enduml
