@@ -1,6 +1,6 @@
 @startuml
 title
-    Keyple 2.0 - keyple-distributed-local-java-lib - 2.0.0 (10/06/2021)
+    Keyple - keyple-distributed-local-java-lib - 2.0.+ (10/06/2021)
 end title
 
 ' == THEME ==
@@ -47,7 +47,7 @@ hide <<grey>> stereotype
 
 legend top
     __Colors legend__ :
-    * __Configuration modes__ :
+    * __Usage modes__ :
     ** <back:lightGreen>**Reader Client Side**</back> (Local Service on **Client**)
     ** <back:plum>**Reader Server Side**</back> (Local Service on **Server**)
     * __External API references__ :
