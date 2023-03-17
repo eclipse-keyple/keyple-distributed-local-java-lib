@@ -146,8 +146,9 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
     // Initial card content
     if (initialCardContent != null) {
-      body.addProperty(
-          JsonProperty.INITIAL_CARD_CONTENT.name(), JsonUtil.toJson(initialCardContent));
+      body.add(
+          JsonProperty.INITIAL_CARD_CONTENT.name(),
+          JsonUtil.getParser().toJsonTree(initialCardContent));
       body.addProperty(
           JsonProperty.INITIAL_CARD_CONTENT_CLASS_NAME.name(),
           initialCardContent.getClass().getName());
@@ -155,7 +156,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
     // Input data
     if (inputData != null) {
-      body.addProperty(JsonProperty.INPUT_DATA.name(), JsonUtil.toJson(inputData));
+      body.add(JsonProperty.INPUT_DATA.name(), JsonUtil.getParser().toJsonTree(inputData));
     }
 
     return new MessageDto()
@@ -220,8 +221,8 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     String outputDataJson =
         parser
             .fromJson(message.getBody(), JsonObject.class)
-            .get(JsonProperty.OUTPUT_DATA.name())
-            .getAsString();
+            .getAsJsonObject(JsonProperty.OUTPUT_DATA.name())
+            .toString();
     return parser.fromJson(outputDataJson, outputDataClass);
   }
 
