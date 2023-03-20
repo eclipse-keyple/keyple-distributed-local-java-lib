@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+**CAUTION**: this version requires to use at least version `2.2.0` of the
+[Keyple Distributed Remote Library](https://keyple.org/components-java/distributed/keyple-distributed-remote-java-lib/)!
 ### Added
 - `CHANGELOG.md` file (issue [eclipse/keyple#6]).
 - CI: Forbid the publication of a version already released (issue [#5]).
