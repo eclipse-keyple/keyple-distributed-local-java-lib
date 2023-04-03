@@ -22,10 +22,7 @@ import org.eclipse.keyple.distributed.spi.SyncEndpointClientSpi;
  */
 public final class LocalServiceClientFactoryBuilder {
 
-  /**
-   * (private)<br>
-   * Constructor
-   */
+  /** Constructor */
   private LocalServiceClientFactoryBuilder() {}
 
   /**
@@ -88,10 +85,7 @@ public final class LocalServiceClientFactoryBuilder {
     LocalServiceClientFactory build();
   }
 
-  /**
-   * (private)<br>
-   * The internal step builder.
-   */
+  /** The internal step builder. */
   private static final class Builder implements NodeStep, BuilderStep {
 
     private final String localServiceName;

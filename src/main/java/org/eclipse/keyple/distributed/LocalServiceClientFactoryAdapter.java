@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Adapter of {@link LocalServiceClientFactory}.
  *
  * @since 2.0.0
@@ -34,7 +33,6 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
   private final int asyncNodeClientTimeoutSeconds;
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.

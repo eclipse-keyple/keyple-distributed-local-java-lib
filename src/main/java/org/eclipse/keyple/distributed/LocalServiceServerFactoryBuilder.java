@@ -21,10 +21,7 @@ import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
  */
 public final class LocalServiceServerFactoryBuilder {
 
-  /**
-   * (private)<br>
-   * Constructor
-   */
+  /** Constructor */
   private LocalServiceServerFactoryBuilder() {}
 
   /**
@@ -93,10 +90,7 @@ public final class LocalServiceServerFactoryBuilder {
     LocalServiceServerFactory build();
   }
 
-  /**
-   * (private)<br>
-   * The internal step builder.
-   */
+  /** The internal step builder. */
   private static final class Builder implements NodeStep, BuilderStep {
 
     private final String localServiceName;

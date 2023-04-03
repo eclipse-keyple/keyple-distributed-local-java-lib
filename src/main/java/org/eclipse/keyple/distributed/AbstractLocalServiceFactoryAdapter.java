@@ -16,7 +16,6 @@ import org.eclipse.keyple.core.distributed.local.DistributedLocalApiProperties;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceFactorySpi;
 
 /**
- * (package-private)<br>
  * Abstract class of all local service factory adapters.
  *
  * @since 2.0.0
@@ -26,7 +25,6 @@ abstract class AbstractLocalServiceFactoryAdapter implements LocalServiceFactory
   private final String localServiceName;
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
