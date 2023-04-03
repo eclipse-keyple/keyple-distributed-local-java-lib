@@ -62,7 +62,7 @@ public class LocalServiceClientAdapterTest {
   public static void beforeClass() {
 
     JsonObject body = new JsonObject();
-    body.add(JsonProperty.OUTPUT_DATA.name(), JsonUtil.getParser().toJsonTree(new OutputData()));
+    body.add(JsonProperty.OUTPUT_DATA.getKey(), JsonUtil.getParser().toJsonTree(new OutputData()));
     OUTPUT_DATA = body.toString();
 
     endRemoteServiceMessage =

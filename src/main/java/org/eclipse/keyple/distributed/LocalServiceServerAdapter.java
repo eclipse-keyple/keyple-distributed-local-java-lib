@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Adapter of {@link LocalServiceServer}.
  *
  * @since 2.0.0
@@ -38,7 +37,6 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   private final Object readerClientsMonitor;
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
@@ -147,7 +145,6 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   }
 
   /**
-   * (private)<br>
    * Sends a message using the provided reader name for local and remote reader.
    *
    * @param action The action.
@@ -201,7 +198,6 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   }
 
   /**
-   * (private)<br>
    * Registers a client.
    *
    * @param message The incoming message.
@@ -229,10 +225,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     }
   }
 
-  /**
-   * (private)<br>
-   * Client info.
-   */
+  /** Client info. */
   private static class ClientInfo {
 
     private String clientNodeId;

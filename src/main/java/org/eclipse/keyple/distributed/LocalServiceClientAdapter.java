@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Adapter of {@link LocalServiceClient}.
  *
  * @since 2.0.0
@@ -32,7 +31,6 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   private static final Logger logger = LoggerFactory.getLogger(LocalServiceClientAdapter.class);
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.
@@ -122,7 +120,6 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   }
 
   /**
-   * (private)<br>
    * Builds a message associated to the {@link Action#EXECUTE_REMOTE_SERVICE} action.
    *
    * @param serviceId The ticketing service ID.
@@ -142,21 +139,21 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     JsonObject body = new JsonObject();
 
     // Service ID
-    body.addProperty(JsonProperty.SERVICE_ID.name(), serviceId);
+    body.addProperty(JsonProperty.SERVICE_ID.getKey(), serviceId);
 
     // Initial card content
     if (initialCardContent != null) {
       body.add(
-          JsonProperty.INITIAL_CARD_CONTENT.name(),
+          JsonProperty.INITIAL_CARD_CONTENT.getKey(),
           JsonUtil.getParser().toJsonTree(initialCardContent));
       body.addProperty(
-          JsonProperty.INITIAL_CARD_CONTENT_CLASS_NAME.name(),
+          JsonProperty.INITIAL_CARD_CONTENT_CLASS_NAME.getKey(),
           initialCardContent.getClass().getName());
     }
 
     // Input data
     if (inputData != null) {
-      body.add(JsonProperty.INPUT_DATA.name(), JsonUtil.getParser().toJsonTree(inputData));
+      body.add(JsonProperty.INPUT_DATA.getKey(), JsonUtil.getParser().toJsonTree(inputData));
     }
 
     return new MessageDto()
@@ -167,7 +164,6 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   }
 
   /**
-   * (private)<br>
    * Process the entire transaction.<br>
    * Check server response : loop while message action is not a terminate service or an error, then
    * execute the command locally and send back response to the server.
@@ -205,7 +201,6 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
   }
 
   /**
-   * (private)<br>
    * Extracts the output data from the provided message if configured.
    *
    * @param message The message.
@@ -221,7 +216,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     String outputDataJson =
         parser
             .fromJson(message.getBody(), JsonObject.class)
-            .getAsJsonObject(JsonProperty.OUTPUT_DATA.name())
+            .getAsJsonObject(JsonProperty.OUTPUT_DATA.getKey())
             .toString();
     return parser.fromJson(outputDataJson, outputDataClass);
   }

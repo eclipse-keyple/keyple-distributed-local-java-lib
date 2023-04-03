@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Adapter of {@link LocalServiceServerFactory}.
  *
  * @since 2.0.0
@@ -34,7 +33,6 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
   private final String[] poolPluginNames;
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service to build.

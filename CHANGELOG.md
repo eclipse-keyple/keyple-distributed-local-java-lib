@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial card content and user input/output data used for "ReaderClientSide" mode are now serialized/de-serialized 
   as JSON objects, and no more as strings containing JSON objects.
+- All JSON property names are now "lowerCamelCase" formatted.
+### Upgraded
+- "Keyple Util Library" to version `2.3.0`.
+- "Google Gson Library" (com.google.code.gson) to version `2.10.1`.
 
 ## [2.0.0] - 2021-10-06
 This is the initial release.

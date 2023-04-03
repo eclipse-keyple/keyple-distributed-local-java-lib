@@ -15,7 +15,6 @@ import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.distributed.local.spi.LocalServiceSpi;
 
 /**
- * (package-private)<br>
  * Abstract class of all local service adapters.
  *
  * @since 2.0.0
@@ -28,7 +27,6 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
   private LocalServiceApi localServiceApi;
 
   /**
-   * (package-private)<br>
    * Constructor.
    *
    * @param localServiceName The name of the local service.
@@ -39,7 +37,6 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
   }
 
   /**
-   * (package-private)<br>
    * Gets the connected Keyple core local service API.
    *
    * @return Null if the current local service is not yet registered to the Keyple main service.
