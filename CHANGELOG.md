@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.0] - 2023-04-04
 :warning: **CAUTION**: this version requires to use at least version `2.2.0` of the
 [Keyple Distributed Remote Library](https://keyple.org/components-java/distributed/keyple-distributed-remote-java-lib/)!
 ### Added
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as JSON objects, and no more as strings containing JSON objects.
 - All JSON property names are now "lowerCamelCase" formatted.
 ### Upgraded
+- "Keyple Distributed Network Library" to version `2.2.0`.
 - "Keyple Util Library" to version `2.3.0`.
 - "Google Gson Library" (com.google.code.gson) to version `2.10.1`.
 
@@ -23,7 +26,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse/keyple-distributed-local-java-lib/compare/2.0.0...HEAD
+[unreleased]: https://github.com/eclipse/keyple-distributed-local-java-lib/compare/2.2.0...HEAD
+[2.2.0]: https://github.com/eclipse/keyple-distributed-local-java-lib/compare/2.0.0...2.2.0
 [2.0.0]: https://github.com/eclipse/keyple-distributed-local-java-lib/releases/tag/2.0.0
 
 [#5]: https://github.com/eclipse/keyple-distributed-local-java-lib/issues/5

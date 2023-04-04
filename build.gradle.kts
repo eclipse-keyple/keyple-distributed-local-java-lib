@@ -31,7 +31,7 @@ repositories {
 dependencies {
     implementation("org.eclipse.keyple:keyple-common-java-api:2.0.0")
     implementation("org.eclipse.keyple:keyple-distributed-local-java-api:2.0.0")
-    implementation("org.eclipse.keyple:keyple-distributed-network-java-lib:2.0.1-SNAPSHOT") { isChanging = true }
+    implementation("org.eclipse.keyple:keyple-distributed-network-java-lib:2.2.0")
     implementation("org.eclipse.keyple:keyple-util-java-lib:2.3.0")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("com.google.code.gson:gson:2.10.1")
