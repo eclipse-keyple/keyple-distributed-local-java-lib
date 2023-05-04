@@ -1,6 +1,6 @@
 @startuml
 title
-    Keyple - keyple-distributed-local-java-lib - 2.0.+ (10/06/2021)
+    Keyple - keyple-distributed-local-java-lib - 2.2.+ (2023-05-04)
 end title
 
 ' == THEME ==
@@ -15,13 +15,19 @@ end title
 !define C_LINK 3498DB
 !define C_USE 27AE60
 
-skinparam Shadowing false
-skinparam ClassFontStyle italic
-skinparam ClassBorderColor #D4AC0D
+' -- Styles that don't work with new version of plantuml --
 skinparam stereotypeABorderColor #A9DCDF
 skinparam stereotypeIBorderColor #B4A7E5
 skinparam stereotypeCBorderColor #ADD1B2
 skinparam stereotypeEBorderColor #EB93DF
+' -- END --
+
+skinparam ClassBorderThickness 2
+skinparam ArrowThickness 2
+
+' Yellow
+skinparam ClassBackgroundColor #FEFECE
+skinparam ClassBorderColor #D4AC0D
 ' Red
 skinparam ClassBackgroundColor<<red>> #FDEDEC
 skinparam ClassBorderColor<<red>> #E74C3C
@@ -128,16 +134,16 @@ LocalServiceServerFactory ..> LocalServiceServer #C_LINK : create >
 
 package root #C_GREY1 {}
 
-interface LocalServiceClient <<green>>
-interface LocalServiceClientFactory <<green>>
-class LocalServiceClientFactoryBuilder <<green>>
-interface LocalServiceClientFactoryNodeStep <<green>>
-interface LocalServiceClientFactoryBuilderStep <<green>>
+interface root.LocalServiceClient <<green>>
+interface root.LocalServiceClientFactory <<green>>
+class root.LocalServiceClientFactoryBuilder <<green>>
+interface root.LocalServiceClientFactoryNodeStep <<green>>
+interface root.LocalServiceClientFactoryBuilderStep <<green>>
 
-interface LocalServiceServer <<purple>>
-interface LocalServiceServerFactory <<purple>>
-class LocalServiceServerFactoryBuilder <<purple>>
-interface LocalServiceServerFactoryNodeStep <<purple>>
-interface LocalServiceServerFactoryBuilderStep <<purple>>
+interface root.LocalServiceServer <<purple>>
+interface root.LocalServiceServerFactory <<purple>>
+class root.LocalServiceServerFactoryBuilder <<purple>>
+interface root.LocalServiceServerFactoryNodeStep <<purple>>
+interface root.LocalServiceServerFactoryBuilderStep <<purple>>
 
 @enduml
