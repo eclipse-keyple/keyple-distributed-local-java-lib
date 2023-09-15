@@ -157,6 +157,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     getNode()
         .sendMessage(
             new MessageDto()
+                .setApiLevel(clientInfo.clientDistributedApiLevel)
                 .setAction(action.name())
                 .setLocalReaderName(readerName)
                 .setRemoteReaderName(readerName)
@@ -217,21 +218,25 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
           }
         }
       }
-      readerClientInfos.add(new ClientInfo(message.getClientNodeId(), message.getSessionId()));
+      readerClientInfos.add(
+          new ClientInfo(message.getApiLevel(), message.getClientNodeId(), message.getSessionId()));
 
     } else {
       // Plugin command
-      pluginClients.add(new ClientInfo(message.getClientNodeId(), message.getSessionId()));
+      pluginClients.add(
+          new ClientInfo(message.getApiLevel(), message.getClientNodeId(), message.getSessionId()));
     }
   }
 
   /** Client info. */
   private static class ClientInfo {
 
-    private String clientNodeId;
-    private String sessionId;
+    private final int clientDistributedApiLevel;
+    private final String clientNodeId;
+    private final String sessionId;
 
-    private ClientInfo(String clientNodeId, String sessionId) {
+    private ClientInfo(int clientDistributedApiLevel, String clientNodeId, String sessionId) {
+      this.clientDistributedApiLevel = clientDistributedApiLevel;
       this.clientNodeId = clientNodeId;
       this.sessionId = sessionId;
     }

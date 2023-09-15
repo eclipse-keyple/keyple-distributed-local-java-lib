@@ -138,6 +138,13 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
 
     JsonObject body = new JsonObject();
 
+    // API level:
+    // The API level is retrieved from the wrapper, as the body content has been created by the
+    // Distributed client layer.
+    // In this particular case, the API level contained in the body does not reflect the version of
+    // the body, but that of the Core client layer.
+    body.addProperty(JsonProperty.CORE_API_LEVEL.getKey(), getCoreApiLevel());
+
     // Service ID
     body.addProperty(JsonProperty.SERVICE_ID.getKey(), serviceId);
 
