@@ -42,7 +42,7 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
    * @return Null if the current local service is not yet registered to the Keyple main service.
    * @since 2.0.0
    */
-  LocalServiceApi getLocalServiceApi() {
+  final LocalServiceApi getLocalServiceApi() {
     return localServiceApi;
   }
 
@@ -64,5 +64,16 @@ abstract class AbstractLocalServiceAdapter extends AbstractMessageHandlerAdapter
   @Override
   public final String getName() {
     return localServiceName;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.3.0
+   */
+  @Override
+  public int exchangeApiLevel(int coreApiLevel) {
+    setCoreApiLevel(coreApiLevel);
+    return MessageDto.API_LEVEL;
   }
 }
