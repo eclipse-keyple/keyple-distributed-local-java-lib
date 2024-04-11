@@ -141,13 +141,13 @@ public class LocalServiceServerAdapterTest {
   public void onPluginEvent_whenNoPluginClientIsReferenced_shouldNotInvokeSendMessageOnEndpoint() {
     syncService.onPluginEvent(LOCAL_READER_NAME, "eventData");
     asyncService.onPluginEvent(LOCAL_READER_NAME, "eventData");
-    verifyZeroInteractions(asyncEndpointServerSpi);
+    verifyNoInteractions(asyncEndpointServerSpi);
   }
 
   @Test
   public void onReaderEvent_whenNoReaderClientIsReferenced_shouldNotInvokeSendMessageOnEndpoint() {
     syncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
     asyncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
-    verifyZeroInteractions(asyncEndpointServerSpi);
+    verifyNoInteractions(asyncEndpointServerSpi);
   }
 }
