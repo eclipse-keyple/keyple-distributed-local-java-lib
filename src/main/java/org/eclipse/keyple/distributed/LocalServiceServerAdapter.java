@@ -46,8 +46,8 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   LocalServiceServerAdapter(String localServiceName, String... poolPluginNames) {
     super(localServiceName);
     this.poolPluginNames = poolPluginNames;
-    this.pluginClients = Collections.newSetFromMap(new ConcurrentHashMap<ClientInfo, Boolean>(1));
-    this.readerClients = new ConcurrentHashMap<String, Set<ClientInfo>>(1);
+    this.pluginClients = Collections.newSetFromMap(new ConcurrentHashMap<>(1));
+    this.readerClients = new ConcurrentHashMap<>(1);
     this.readerClientsMonitor = new Object();
   }
 
@@ -63,8 +63,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     }
     throw new IllegalStateException(
         String.format(
-            "Local service '%s' is not configured with a synchronous network protocol.",
-            getName()));
+            "Local service [%s] is not configured with a synchronous network protocol", getName()));
   }
 
   /**
@@ -79,7 +78,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     }
     throw new IllegalStateException(
         String.format(
-            "Local service '%s' is not configured with an asynchronous network protocol.",
+            "Local service [%s] is not configured with an asynchronous network protocol",
             getName()));
   }
 
@@ -101,14 +100,14 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    */
   @Override
   public void onPluginEvent(String readerName, String jsonData) {
-    Set<ClientInfo> pluginClientsCopy = new HashSet<ClientInfo>(pluginClients);
+    Set<ClientInfo> pluginClientsCopy = new HashSet<>(pluginClients);
     for (ClientInfo clientInfo : pluginClientsCopy) {
       try {
         sendMessage(MessageDto.Action.PLUGIN_EVENT, readerName, jsonData, clientInfo);
       } catch (Exception e) {
         pluginClients.remove(clientInfo);
         logger.warn(
-            "Client of plugin event is de-referenced due to an unexpected error : readerName={}, clientNodeId={}, sessionId={}, error={}",
+            "Client of plugin event de-referenced due to an unexpected error (readerName: {}, clientNodeId: {}, sessionId: {}, error: {})",
             readerName,
             clientInfo.clientNodeId,
             clientInfo.sessionId,
@@ -128,14 +127,14 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     if (readerClientsRef == null) {
       return;
     }
-    Set<ClientInfo> readerClientsCopy = new HashSet<ClientInfo>(readerClientsRef);
+    Set<ClientInfo> readerClientsCopy = new HashSet<>(readerClientsRef);
     for (ClientInfo clientInfo : readerClientsCopy) {
       try {
         sendMessage(MessageDto.Action.READER_EVENT, readerName, jsonData, clientInfo);
       } catch (Exception e) {
         readerClientsRef.remove(clientInfo);
         logger.warn(
-            "Client of reader event is de-referenced due to an unexpected error : readerName={}, clientNodeId={}, sessionId={}, error={}",
+            "Client of reader event de-referenced due to an unexpected error (readerName: {}, clientNodeId: {}, sessionId: {}, error: {})",
             readerName,
             clientInfo.clientNodeId,
             clientInfo.sessionId,
@@ -212,8 +211,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
         synchronized (readerClientsMonitor) {
           readerClientInfos = readerClients.get(message.getLocalReaderName());
           if (readerClientInfos == null) {
-            readerClientInfos =
-                Collections.newSetFromMap(new ConcurrentHashMap<ClientInfo, Boolean>(1));
+            readerClientInfos = Collections.newSetFromMap(new ConcurrentHashMap<>(1));
             readerClients.put(message.getLocalReaderName(), readerClientInfos);
           }
         }

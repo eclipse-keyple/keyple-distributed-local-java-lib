@@ -66,14 +66,14 @@ final class LocalServiceClientFactoryAdapter extends AbstractLocalServiceFactory
     // Bind the node.
     if (syncEndpointClientSpi != null) {
       logger.info(
-          "Create a new 'LocalServiceClient' with name='{}', nodeType='SyncNodeClient'",
+          "Create new 'LocalServiceClient' (name: {}, nodeType: SyncNodeClient)",
           getLocalServiceName());
 
       localService.bindSyncNodeClient(syncEndpointClientSpi, null, null);
 
     } else {
       logger.info(
-          "Create a new 'LocalServiceClient' with name='{}', nodeType='AsyncNodeClient', timeoutSeconds={}",
+          "Create new 'LocalServiceClient' (name: {}, nodeType: AsyncNodeClient, timeoutSeconds: {})",
           getLocalServiceName(),
           asyncNodeClientTimeoutSeconds);
 

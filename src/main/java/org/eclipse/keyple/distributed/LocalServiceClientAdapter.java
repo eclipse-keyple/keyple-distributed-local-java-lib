@@ -53,7 +53,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     }
     throw new IllegalStateException(
         String.format(
-            "Local service '%s' is not configured with an asynchronous network protocol.",
+            "Local service [%s] is not configured with an asynchronous network protocol",
             getName()));
   }
 
@@ -78,13 +78,11 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     // Generate a new session ID.
     String sessionId = generateSessionId();
 
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "Start execution of remote service '{}' for local reader '{}' with session ID '{}'.",
-          serviceId,
-          localReaderName,
-          sessionId);
-    }
+    logger.info(
+        "Start remote service (serviceId: {}, localReaderName: {}, sessionId: {})",
+        serviceId,
+        localReaderName,
+        sessionId);
 
     // Build the message DTO.
     MessageDto message =
@@ -108,13 +106,11 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
       getNode().closeSessionSilently(sessionId);
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "Finish execution of remote service '{}' for local reader '{}' with session ID '{}'.",
-          serviceId,
-          localReaderName,
-          sessionId);
-    }
+    logger.info(
+        "End remote service (serviceId: {}, localReaderName: {}, sessionId: {})",
+        serviceId,
+        localReaderName,
+        sessionId);
 
     return outputData;
   }
