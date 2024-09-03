@@ -144,6 +144,11 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     // Service ID
     body.addProperty(JsonProperty.SERVICE_ID.getKey(), serviceId);
 
+    // Is local reader contactless?
+    body.addProperty(
+        JsonProperty.IS_READER_CONTACTLESS.getKey(),
+        getLocalServiceApi().isReaderContactless(localReaderName));
+
     // Initial card content
     if (initialCardContent != null) {
       body.add(
