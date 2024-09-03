@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Logging improvement.
 ### Upgraded
-- Keyple Distributed Network Lib `2.3.1` -> `2.3.2` (source code not impacted)
+- Keyple Distributed Network Lib `2.3.1` -> `2.5.0` (source code not impacted)
+- Keyple Distributed Local API `2.1.1` -> `2.2.0`
 
 ## [2.3.1] - 2024-04-12
 ### Changed

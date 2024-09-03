@@ -74,6 +74,7 @@ public class LocalServiceClientAdapterTest {
             .setBody(OUTPUT_DATA);
 
     localServiceApi = mock(LocalServiceApi.class);
+    doReturn(true).when(localServiceApi).isReaderContactless(LOCAL_READER_NAME);
 
     syncEndpointClientSpi = mock(SyncEndpointClientSpi.class);
     doReturn(Collections.singletonList(endRemoteServiceMessage))
@@ -189,11 +190,13 @@ public class LocalServiceClientAdapterTest {
 
   @Test
   public void executeRemoteService_whenSyncAndOutputDataClassIsSet_shouldReturnANotNullValue() {
+    syncService.connect(localServiceApi);
     OutputData expectedOutputData = new OutputData();
     OutputData outputData =
         syncService.executeRemoteService(
             SERVICE_ID, LOCAL_READER_NAME, null, null, OutputData.class);
     assertThat(outputData).isEqualToComparingFieldByField(expectedOutputData);
+    syncService.connect(null);
   }
 
   @Test(expected = UnsupportedOperationException.class)
