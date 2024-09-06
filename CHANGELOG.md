@@ -5,11 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.5.0] - 2024-09-06
+### Added
+- Optimizes the "Reader Client Side" usage mode. 
+  When a remote service is requested, 
+  the client sends to the server the information on whether the local reader is in contact or contactless mode. 
+  This reduces the number of network exchanges.
+  This optimization will only be effective if the server is running version `2.5+` of the 
+  [Keyple Distributed Remote Library](https://keyple.org/components-java/distributed/keyple-distributed-remote-java-lib/).
 ### Changed
 - Logging improvement.
 ### Upgraded
-- Keyple Distributed Network Lib `2.3.1` -> `2.5.0` (source code not impacted)
 - Keyple Distributed Local API `2.1.1` -> `2.2.0`
+- Keyple Distributed Network Lib `2.3.1` -> `2.5.0`
 
 ## [2.3.1] - 2024-04-12
 ### Changed
@@ -52,7 +61,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse-keyple/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.3.1...HEAD
+[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.0...HEAD
+[2.5.0]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.3.1...2.5.0
 [2.3.1]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.0.0...2.2.0
