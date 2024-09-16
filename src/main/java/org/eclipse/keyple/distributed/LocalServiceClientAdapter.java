@@ -165,6 +165,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     }
 
     return new MessageDto()
+        .setApiLevel(API_LEVEL)
         .setSessionId(sessionId)
         .setAction(Action.EXECUTE_REMOTE_SERVICE.name())
         .setLocalReaderName(localReaderName)
