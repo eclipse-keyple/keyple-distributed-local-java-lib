@@ -67,6 +67,7 @@ public class LocalServiceClientAdapterTest {
 
     endRemoteServiceMessage =
         new MessageDto()
+            .setApiLevel(API_LEVEL)
             .setAction(Action.END_REMOTE_SERVICE.name())
             .setSessionId(SESSION_ID)
             .setClientNodeId(CLIENT_NODE_ID)
