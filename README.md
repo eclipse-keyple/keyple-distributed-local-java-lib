@@ -21,7 +21,7 @@ The full documentation, including the **user guide**, **download information** a
 
 ## API documentation
 
-API documentation & class diagram is available online: [eclipse-keyple.github.io/keyple-distributed-local-java-lib](https://eclipse-keyple.github.io/keyple-distributed-local-java-lib)
+API documentation & class diagram is available online: [docs.keyple.org/keyple-distributed-local-java-lib](https://docs.keyple.org/keyple-distributed-local-java-lib)
 
 ## Examples
 
