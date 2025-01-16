@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
+import org.eclipse.keyple.core.util.json.BodyError;
 import org.eclipse.keyple.core.util.json.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,12 +186,12 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       // Build the response to send back to the client.
       result = new MessageDto(message).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
 
-    } catch (IllegalStateException e) {
+    } catch (Exception e) {
       // Build the error response to send back to the client.
       result =
           new MessageDto(message)
               .setAction(MessageDto.Action.ERROR.name())
-              .setBody(JsonUtil.toJson(e));
+              .setBody(JsonUtil.toJson(new BodyError(e)));
     }
 
     // Send the response.
