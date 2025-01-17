@@ -16,6 +16,7 @@ import static org.eclipse.keyple.distributed.MessageDto.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.eclipse.keyple.core.util.Assert;
+import org.eclipse.keyple.core.util.json.BodyError;
 import org.eclipse.keyple.core.util.json.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,9 +195,11 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
         // Build the response to send back to the server.
         message.setAction(Action.RESP.name()).setBody(jsonResult);
 
-      } catch (IllegalStateException e) {
+      } catch (Exception e) {
         // Build the error response to send back to the client.
-        message.setAction(MessageDto.Action.ERROR.name()).setBody(JsonUtil.toJson(e));
+        message
+            .setAction(MessageDto.Action.ERROR.name())
+            .setBody(JsonUtil.toJson(new BodyError(e)));
       }
 
       // Send the response and get the next command to process.
