@@ -53,9 +53,9 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
       return (AsyncNodeClient) getNode();
     }
     throw new IllegalStateException(
-        String.format(
-            "Local service [%s] is not configured with an asynchronous network protocol",
-            getName()));
+        "Local service '"
+            + getName()
+            + "' is not configured with an asynchronous network protocol");
   }
 
   /**
@@ -80,7 +80,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     String sessionId = generateSessionId();
 
     logger.info(
-        "Start remote service (serviceId: {}, localReaderName: {}, sessionId: {})",
+        "Processing remote service [serviceId={}, localReaderName={}, sessionId={}]",
         serviceId,
         localReaderName,
         sessionId);
@@ -108,7 +108,7 @@ final class LocalServiceClientAdapter extends AbstractLocalServiceAdapter
     }
 
     logger.info(
-        "End remote service (serviceId: {}, localReaderName: {}, sessionId: {})",
+        "Remote service processed [serviceId={}, localReaderName={}, sessionId={}]",
         serviceId,
         localReaderName,
         sessionId);

@@ -62,19 +62,16 @@ final class LocalServiceServerFactoryAdapter extends AbstractLocalServiceFactory
         new LocalServiceServerAdapter(getLocalServiceName(), poolPluginNames);
 
     // Bind the node.
-    String nodeType = asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer";
-    String withPoolPluginNames = Arrays.toString(poolPluginNames);
-    logger.info(
-        "Create new 'LocalServiceServer' (name: {}, nodeType: {}, withPoolPluginNames: {})",
-        getLocalServiceName(),
-        nodeType,
-        withPoolPluginNames);
-
     if (asyncEndpointServerSpi == null) {
       localService.bindSyncNodeServer();
     } else {
       localService.bindAsyncNodeServer(asyncEndpointServerSpi);
     }
+    logger.info(
+        "New 'LocalServiceServer' created [name={}, nodeType={}, withPoolPluginNames={}]",
+        getLocalServiceName(),
+        asyncEndpointServerSpi != null ? "AsyncNodeServer" : "SyncNodeServer",
+        Arrays.toString(poolPluginNames));
 
     return localService;
   }

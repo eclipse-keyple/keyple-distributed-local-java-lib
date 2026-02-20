@@ -5,8 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.5.3] - 2026-02-20
 ### Changed
+- Normalized logging and error messages using Keyple coding standards.
 - Migrated the CI pipeline from Jenkins to GitHub Actions.
+### Upgraded
+- `keyple-common-java-api` from `2.0.1` to `2.0.2` (source code not impacted)
+- `keyple-distributed-local-java-api` from `2.2.0` to `2.2.1` (source code not impacted)
+- `keyple-distributed-network-java-lib` from `2.5.1` to `2.5.2` (source code not impacted)
+- `keyple-util-java-lib` from `2.4.0` to `2.4.1` (source code not impacted)
+- `slf4j-api` from `1.7.32` to `1.7.36` (`compileOnly`)
 
 ## [2.5.2] - 2025-01-17
 ### Fixed
@@ -74,7 +83,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse-keyple/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.2...HEAD
+[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.3...HEAD
+[2.5.3]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.2...2.5.3
 [2.5.2]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.1...2.5.2
 [2.5.1]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.0...2.5.1
 [2.5.0]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.3.1...2.5.0

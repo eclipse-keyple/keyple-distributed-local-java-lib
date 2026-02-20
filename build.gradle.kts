@@ -14,13 +14,14 @@ plugins {
 ///////////////////////////////////////////////////////////////////////////////
 
 dependencies {
-  implementation("org.eclipse.keyple:keyple-common-java-api:2.0.1")
-  implementation("org.eclipse.keyple:keyple-distributed-local-java-api:2.2.0")
-  implementation("org.eclipse.keyple:keyple-distributed-network-java-lib:2.5.1")
-  implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.0")
-  implementation("org.slf4j:slf4j-api:1.7.32")
+  implementation("org.eclipse.keyple:keyple-common-java-api:2.0.2")
+  implementation("org.eclipse.keyple:keyple-distributed-local-java-api:2.2.1")
+  implementation("org.eclipse.keyple:keyple-distributed-network-java-lib:2.5.2")
+  implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.1")
   implementation("com.google.code.gson:gson:2.10.1")
-  testImplementation("org.slf4j:slf4j-simple:1.7.32")
+  compileOnly("org.slf4j:slf4j-api:1.7.36")
+
+  testImplementation("org.slf4j:slf4j-simple:1.7.36")
   testImplementation(platform("org.junit:junit-bom:5.10.2"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.junit.vintage:junit-vintage-engine")

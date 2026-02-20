@@ -63,8 +63,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       return (SyncNodeServer) getNode();
     }
     throw new IllegalStateException(
-        String.format(
-            "Local service [%s] is not configured with a synchronous network protocol", getName()));
+        "Local service '" + getName() + "' is not configured with a synchronous network protocol");
   }
 
   /**
@@ -78,9 +77,9 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       return (AsyncNodeServer) getNode();
     }
     throw new IllegalStateException(
-        String.format(
-            "Local service [%s] is not configured with an asynchronous network protocol",
-            getName()));
+        "Local service '"
+            + getName()
+            + "' is not configured with an asynchronous network protocol");
   }
 
   /**
@@ -108,7 +107,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       } catch (Exception e) {
         pluginClients.remove(clientInfo);
         logger.warn(
-            "Client of plugin event de-referenced due to an unexpected error (readerName: {}, clientNodeId: {}, sessionId: {}, error: {})",
+            "Client of plugin event de-referenced due to an unexpected error [readerName={}, clientNodeId={}, sessionId={}, error={}]",
             readerName,
             clientInfo.clientNodeId,
             clientInfo.sessionId,
@@ -135,7 +134,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       } catch (Exception e) {
         readerClientsRef.remove(clientInfo);
         logger.warn(
-            "Client of reader event de-referenced due to an unexpected error (readerName: {}, clientNodeId: {}, sessionId: {}, error: {})",
+            "Client of reader event de-referenced due to an unexpected error [readerName={}, clientNodeId={}, sessionId={}, error={}]",
             readerName,
             clientInfo.clientNodeId,
             clientInfo.sessionId,
