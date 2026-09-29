@@ -15,6 +15,26 @@ It must be imported and used by the application installed on the terminal **havi
 
 It uses the common library [Keyple Distributed Network Java Lib](https://github.com/eclipse-keyple/keyple-distributed-network-java-lib).
 
+## Versioning
+
+The three libraries of the **Keyple Distributed** solution
+([Network](https://github.com/eclipse-keyple/keyple-distributed-network-java-lib),
+[Local](https://github.com/eclipse-keyple/keyple-distributed-local-java-lib) and
+[Remote](https://github.com/eclipse-keyple/keyple-distributed-remote-java-lib)) form a single component split into
+several artifacts: they share the same Java package and rely on internal (non-public) contracts of each other. Their
+versions are therefore aligned according to the following rules:
+
+- The three libraries always share the same **major** and **minor** version numbers (e.g. `2.6.x`). A new major or
+  minor version is always released for the three libraries at the same time.
+- **Patch** versions are independent: a library can be released alone to fix an issue (e.g.
+  `keyple-distributed-local-java-lib` `2.6.1` used with `keyple-distributed-network-java-lib` `2.6.0`).
+- Any change of an internal contract between the libraries requires a new minor version of the three libraries.
+
+Applications must use the same major and minor versions for all the Keyple Distributed libraries they import (ideally
+with the latest patch of each). The simplest way to do so is to import the
+[Keyple Java BOM](https://github.com/eclipse-keyple/keyple-java-bom), which references a set of versions tested
+together.
+
 ## Documentation & Contribution Guide
 
 The full documentation, including the **user guide**, **download information** and **contribution guide**, is available on the Keyple website [keyple.org](https://keyple.org).

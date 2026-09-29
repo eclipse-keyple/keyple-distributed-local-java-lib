@@ -13,9 +13,11 @@ package org.eclipse.keyple.distributed;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.core.util.json.BodyError;
 import org.eclipse.keyple.core.util.json.JsonUtil;
@@ -32,10 +34,21 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
 
   private static final Logger logger = LoggerFactory.getLogger(LocalServiceServerAdapter.class);
 
+  /** Max number of clients registered for plugin events, and for the events of each reader. */
+  static final int MAX_REGISTERED_CLIENTS = 10000;
+
+  /** Min registration duration before an inactive client can be purged (in milliseconds). */
+  private static final long MIN_REGISTRATION_DURATION_MILLIS = TimeUnit.MINUTES.toMillis(10);
+
+  /** Min duration between two purges of the inactive clients (in milliseconds). */
+  private static final long PURGE_PERIOD_MILLIS = TimeUnit.MINUTES.toMillis(1);
+
   private final String[] poolPluginNames;
   private final Set<ClientInfo> pluginClients;
   private final Map<String, Set<ClientInfo>> readerClients;
   private final Object readerClientsMonitor;
+  private volatile long lastPurgeDatetime;
+  private final Object purgeMonitor;
 
   /**
    * Constructor.
@@ -50,6 +63,7 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     this.pluginClients = Collections.newSetFromMap(new ConcurrentHashMap<>(1));
     this.readerClients = new ConcurrentHashMap<>(1);
     this.readerClientsMonitor = new Object();
+    this.purgeMonitor = new Object();
   }
 
   /**
@@ -173,11 +187,12 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
   @Override
   void onMessage(MessageDto message) {
 
-    // Register the client for events management.
-    registerClient(message);
-
     MessageDto result;
+    ClientInfo newClientInfo = null;
     try {
+      // Register the client for events management.
+      newClientInfo = registerClient(message);
+
       // Execute the command locally.
       String jsonResult =
           getLocalServiceApi().executeLocally(message.getBody(), message.getLocalReaderName());
@@ -186,6 +201,10 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
       result = new MessageDto(message).setAction(MessageDto.Action.RESP.name()).setBody(jsonResult);
 
     } catch (Exception e) {
+      // The client is only kept if the command has been processed.
+      if (newClientInfo != null) {
+        unregisterClient(message.getLocalReaderName(), newClientInfo);
+      }
       // Build the error response to send back to the client.
       result =
           new MessageDto(message)
@@ -201,29 +220,121 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
    * Registers a client.
    *
    * @param message The incoming message.
+   * @return The client info if the client has been newly registered, null otherwise.
+   * @throws IllegalStateException If the client is not registered yet and the max number of
+   *     registered clients is reached.
    */
-  private void registerClient(MessageDto message) {
+  private ClientInfo registerClient(MessageDto message) {
+
+    ClientInfo clientInfo =
+        new ClientInfo(message.getApiLevel(), message.getClientNodeId(), message.getSessionId());
 
     if (message.getLocalReaderName() != null) {
       // Reader command
-      Set<ClientInfo> readerClientInfos = readerClients.get(message.getLocalReaderName());
-      if (readerClientInfos == null) {
-        synchronized (readerClientsMonitor) {
-          readerClientInfos = readerClients.get(message.getLocalReaderName());
-          if (readerClientInfos == null) {
-            readerClientInfos = Collections.newSetFromMap(new ConcurrentHashMap<>(1));
-            readerClients.put(message.getLocalReaderName(), readerClientInfos);
+      synchronized (readerClientsMonitor) {
+        Set<ClientInfo> readerClientInfos = readerClients.get(message.getLocalReaderName());
+        if (readerClientInfos == null) {
+          readerClientInfos = Collections.newSetFromMap(new ConcurrentHashMap<>(1));
+          readerClients.put(message.getLocalReaderName(), readerClientInfos);
+        }
+        return addClient(readerClientInfos, clientInfo);
+      }
+    } else {
+      // Plugin command
+      return addClient(pluginClients, clientInfo);
+    }
+  }
+
+  /**
+   * Adds a client to the provided set if it is not already present.
+   *
+   * @param clientInfos The set of registered clients.
+   * @param clientInfo The client info to add.
+   * @return The client info if the client has been newly added, null otherwise.
+   * @throws IllegalStateException If the client is not present and the max number of registered
+   *     clients is reached.
+   */
+  private ClientInfo addClient(Set<ClientInfo> clientInfos, ClientInfo clientInfo) {
+    if (clientInfos.contains(clientInfo)) {
+      return null;
+    }
+    if (clientInfos.size() >= MAX_REGISTERED_CLIENTS) {
+      purgeInactiveClients();
+    }
+    if (clientInfos.size() >= MAX_REGISTERED_CLIENTS) {
+      throw new IllegalStateException(
+          "Max number of registered clients reached ("
+              + MAX_REGISTERED_CLIENTS
+              + "): client node ID '"
+              + clientInfo.clientNodeId
+              + "' rejected");
+    }
+    return clientInfos.add(clientInfo) ? clientInfo : null;
+  }
+
+  /**
+   * Unregisters a client and removes the reader entry if it no longer has any client.
+   *
+   * @param localReaderName The local reader name (null for a plugin command).
+   * @param clientInfo The client info to remove.
+   */
+  private void unregisterClient(String localReaderName, ClientInfo clientInfo) {
+    if (localReaderName != null) {
+      synchronized (readerClientsMonitor) {
+        Set<ClientInfo> readerClientInfos = readerClients.get(localReaderName);
+        if (readerClientInfos != null) {
+          readerClientInfos.remove(clientInfo);
+          if (readerClientInfos.isEmpty()) {
+            readerClients.remove(localReaderName);
           }
         }
       }
-      readerClientInfos.add(
-          new ClientInfo(message.getApiLevel(), message.getClientNodeId(), message.getSessionId()));
-
     } else {
-      // Plugin command
-      pluginClients.add(
-          new ClientInfo(message.getApiLevel(), message.getClientNodeId(), message.getSessionId()));
+      pluginClients.remove(clientInfo);
     }
+  }
+
+  /**
+   * Removes the clients registered for a while which are no longer active according to the node, at
+   * most once per purge period.
+   */
+  private void purgeInactiveClients() {
+    long now = System.currentTimeMillis();
+    if (now < lastPurgeDatetime + PURGE_PERIOD_MILLIS) {
+      return;
+    }
+    synchronized (purgeMonitor) {
+      if (now < lastPurgeDatetime + PURGE_PERIOD_MILLIS) {
+        return;
+      }
+      lastPurgeDatetime = now;
+    }
+    int nbPurgedClients = purgeInactiveClients(pluginClients, now);
+    for (Set<ClientInfo> readerClientInfos : readerClients.values()) {
+      nbPurgedClients += purgeInactiveClients(readerClientInfos, now);
+    }
+    logger.info("Inactive clients purged [localService={}, count={}]", getName(), nbPurgedClients);
+  }
+
+  /**
+   * Removes the inactive clients of the provided set.
+   *
+   * @param clientInfos The set of registered clients.
+   * @param now The current datetime (in milliseconds).
+   * @return The number of removed clients.
+   */
+  private int purgeInactiveClients(Set<ClientInfo> clientInfos, long now) {
+    int nbPurgedClients = 0;
+    Iterator<ClientInfo> iterator = clientInfos.iterator();
+    while (iterator.hasNext()) {
+      ClientInfo clientInfo = iterator.next();
+      if (now - clientInfo.registrationDatetime > MIN_REGISTRATION_DURATION_MILLIS
+          && !getNode().isClientActive(clientInfo.clientNodeId, clientInfo.sessionId)) {
+        iterator.remove();
+        nbPurgedClients++;
+      }
+    }
+    return nbPurgedClients;
   }
 
   /** Client info. */
@@ -232,11 +343,13 @@ final class LocalServiceServerAdapter extends AbstractLocalServiceAdapter
     private final int clientDistributedApiLevel;
     private final String clientNodeId;
     private final String sessionId;
+    private final long registrationDatetime;
 
     private ClientInfo(int clientDistributedApiLevel, String clientNodeId, String sessionId) {
       this.clientDistributedApiLevel = clientDistributedApiLevel;
       this.clientNodeId = clientNodeId;
       this.sessionId = sessionId;
+      this.registrationDatetime = System.currentTimeMillis();
     }
 
     /**

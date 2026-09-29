@@ -14,6 +14,12 @@ package org.eclipse.keyple.distributed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.keyple.core.distributed.local.LocalServiceApi;
 import org.eclipse.keyple.distributed.spi.AsyncEndpointServerSpi;
 import org.junit.BeforeClass;
@@ -149,5 +155,205 @@ public class LocalServiceServerAdapterTest {
     syncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
     asyncService.onReaderEvent(LOCAL_READER_NAME, "eventData");
     verifyNoInteractions(asyncEndpointServerSpi);
+  }
+
+  @Test
+  public void onMessage_whenReaderCommandIsRejected_shouldNotKeepTheClientRegistered()
+      throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, "unknownReader"))
+        .thenThrow(new IllegalStateException("Reader 'unknownReader' is not registered"));
+
+    List<MessageDto> responses =
+        service.getSyncNode().onRequest(buildCommandMessage("unknownReader", CLIENT_NODE_ID));
+
+    assertThat(responses).hasSize(1);
+    assertThat(responses.get(0).getAction()).isEqualTo(MessageDto.Action.ERROR.name());
+    assertThat(getReaderClients(service)).isEmpty();
+  }
+
+  @Test
+  public void onMessage_whenPluginCommandIsRejected_shouldNotKeepTheClientRegistered()
+      throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, null))
+        .thenThrow(new IllegalArgumentException("Malformed command"));
+
+    service.getSyncNode().onRequest(buildCommandMessage(null, CLIENT_NODE_ID));
+
+    assertThat(getPluginClients(service)).isEmpty();
+  }
+
+  @Test
+  public void onMessage_whenReaderCommandIsAccepted_shouldRegisterTheClient() throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, LOCAL_READER_NAME))
+        .thenReturn("outputData");
+
+    service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID));
+
+    assertThat(getReaderClients(service)).containsOnlyKeys(LOCAL_READER_NAME);
+    assertThat(getReaderClients(service).get(LOCAL_READER_NAME)).hasSize(1);
+  }
+
+  @Test
+  public void
+      onMessage_whenCommandOfAnAlreadyRegisteredClientIsRejected_shouldKeepTheClientRegistered()
+          throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, LOCAL_READER_NAME))
+        .thenReturn("outputData")
+        .thenThrow(new IllegalArgumentException("Malformed command"));
+
+    service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID));
+    service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID));
+
+    assertThat(getReaderClients(service).get(LOCAL_READER_NAME)).hasSize(1);
+  }
+
+  @Test
+  public void onMessage_whenMaxPluginClientsIsReached_shouldRejectOnlyNewClients()
+      throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, null)).thenReturn("outputData");
+    for (int i = 0; i < LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS; i++) {
+      service.getSyncNode().onRequest(buildCommandMessage(null, CLIENT_NODE_ID + i));
+    }
+
+    List<MessageDto> newClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(null, "newClient"));
+    List<MessageDto> existingClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(null, CLIENT_NODE_ID + 0));
+
+    assertThat(newClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.ERROR.name());
+    assertThat(existingClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.RESP.name());
+    assertThat(getPluginClients(service)).hasSize(LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS);
+    verify(
+            service.getLocalServiceApi(),
+            times(LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS + 1))
+        .executeLocally(COMMAND, null);
+  }
+
+  @Test
+  public void onMessage_whenMaxReaderClientsIsReached_shouldRejectOnlyNewClients()
+      throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, LOCAL_READER_NAME))
+        .thenReturn("outputData");
+    for (int i = 0; i < LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS; i++) {
+      service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID + i));
+    }
+
+    List<MessageDto> newClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, "newClient"));
+    List<MessageDto> existingClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID + 0));
+
+    assertThat(newClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.ERROR.name());
+    assertThat(existingClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.RESP.name());
+    assertThat(getReaderClients(service).get(LOCAL_READER_NAME))
+        .hasSize(LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS);
+  }
+
+  @Test
+  public void
+      onMessage_whenMaxPluginClientsIsReachedAndOldClientsAreInactive_shouldPurgeThemAndAcceptNewClient()
+          throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, null)).thenReturn("outputData");
+    for (int i = 0; i < LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS; i++) {
+      service.getSyncNode().onRequest(buildCommandMessage(null, CLIENT_NODE_ID + i));
+    }
+    // Only the first client observes the plugin events
+    service.getSyncNode().onRequest(buildCheckPluginEventMessage(CLIENT_NODE_ID + 0));
+    makeRegistrationsOld(getPluginClients(service));
+
+    List<MessageDto> newClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(null, "newClient"));
+
+    assertThat(newClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.RESP.name());
+    assertThat(getClientNodeIds(getPluginClients(service)))
+        .containsExactlyInAnyOrder(CLIENT_NODE_ID + 0, "newClient");
+  }
+
+  @Test
+  public void
+      onMessage_whenMaxReaderClientsIsReachedAndOldClientsAreInactive_shouldPurgeThemAndAcceptNewClient()
+          throws Exception {
+    LocalServiceServerAdapter service = buildConnectedSyncService();
+    when(service.getLocalServiceApi().executeLocally(COMMAND, LOCAL_READER_NAME))
+        .thenReturn("outputData");
+    for (int i = 0; i < LocalServiceServerAdapter.MAX_REGISTERED_CLIENTS; i++) {
+      service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, CLIENT_NODE_ID + i));
+    }
+    makeRegistrationsOld(getReaderClients(service).get(LOCAL_READER_NAME));
+
+    List<MessageDto> newClientResponses =
+        service.getSyncNode().onRequest(buildCommandMessage(LOCAL_READER_NAME, "newClient"));
+
+    assertThat(newClientResponses.get(0).getAction()).isEqualTo(MessageDto.Action.RESP.name());
+    assertThat(getClientNodeIds(getReaderClients(service).get(LOCAL_READER_NAME)))
+        .containsExactly("newClient");
+  }
+
+  private static MessageDto buildCheckPluginEventMessage(String clientNodeId) {
+    return new MessageDto()
+        .setApiLevel(MessageDto.API_LEVEL)
+        .setAction(MessageDto.Action.CHECK_PLUGIN_EVENT.name())
+        .setSessionId(SESSION_ID)
+        .setClientNodeId(clientNodeId)
+        .setBody("{\"strategy\":\"POLLING\"}");
+  }
+
+  private static void makeRegistrationsOld(Set<?> clientInfos) throws Exception {
+    for (Object clientInfo : clientInfos) {
+      Field field = clientInfo.getClass().getDeclaredField("registrationDatetime");
+      field.setAccessible(true);
+      field.setLong(clientInfo, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(11));
+    }
+  }
+
+  private static List<String> getClientNodeIds(Set<?> clientInfos) throws Exception {
+    List<String> clientNodeIds = new ArrayList<>();
+    for (Object clientInfo : clientInfos) {
+      Field field = clientInfo.getClass().getDeclaredField("clientNodeId");
+      field.setAccessible(true);
+      clientNodeIds.add((String) field.get(clientInfo));
+    }
+    return clientNodeIds;
+  }
+
+  private static LocalServiceServerAdapter buildConnectedSyncService() {
+    LocalServiceServerAdapter service =
+        (LocalServiceServerAdapter)
+            ((LocalServiceServerFactoryAdapter)
+                    LocalServiceServerFactoryBuilder.builder(SERVICE_NAME).withSyncNode().build())
+                .getLocalService();
+    service.connect(mock(LocalServiceApi.class));
+    return service;
+  }
+
+  private static MessageDto buildCommandMessage(String localReaderName, String clientNodeId) {
+    return new MessageDto()
+        .setApiLevel(MessageDto.API_LEVEL)
+        .setAction(MessageDto.Action.CMD.name())
+        .setSessionId(SESSION_ID)
+        .setClientNodeId(clientNodeId)
+        .setLocalReaderName(localReaderName)
+        .setBody(COMMAND);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Set<?>> getReaderClients(LocalServiceServerAdapter service)
+      throws Exception {
+    Field field = LocalServiceServerAdapter.class.getDeclaredField("readerClients");
+    field.setAccessible(true);
+    return (Map<String, Set<?>>) field.get(service);
+  }
+
+  private static Set<?> getPluginClients(LocalServiceServerAdapter service) throws Exception {
+    Field field = LocalServiceServerAdapter.class.getDeclaredField("pluginClients");
+    field.setAccessible(true);
+    return (Set<?>) field.get(service);
   }
 }
