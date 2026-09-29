@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-09-29
+### Changed
+- `LocalServiceServer`: improved the management of the clients registered for event notification. The number of
+  clients registered for plugin events (respectively for the events of each reader) is now limited to 10000, the
+  inactive clients being released when this limit is reached.
+### Upgraded
+- `keyple-distributed-network-java-lib` from `2.5.2` to `2.6.0`
+- `keyple-util-java-lib` from `2.4.1` to `2.5.0`
+
 ## [2.5.3] - 2026-02-20
 ### Changed
 - Normalized logging and error messages using Keyple coding standards.
@@ -83,7 +92,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse-keyple/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.3...HEAD
+[unreleased]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.6.0...HEAD
+[2.6.0]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.3...2.6.0
 [2.5.3]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.2...2.5.3
 [2.5.2]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.1...2.5.2
 [2.5.1]: https://github.com/eclipse-keyple/keyple-distributed-local-java-lib/compare/2.5.0...2.5.1
